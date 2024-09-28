@@ -287,6 +287,7 @@
             if (player != null) Utility.SendPrivateMessageWithWaterMark(userId, $"[{rank}] #{player.playerNumber} {player.username} elo: {elo} is number {placement}/{totalPlayersCount}");
             else Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_NOT_FOUND);
         }
+
         static void HandleLevelCommand(string[] arguments, ulong userId)
         {
             if (arguments.Length > 2)
@@ -310,6 +311,7 @@
             if (player != null) Utility.SendPrivateMessageWithWaterMark(userId, $"[{rank}] #{player.playerNumber} {player.username} is level {level}");
             else Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_NOT_FOUND);
         }
+
         static void HandleWinCommand(string[] arguments, ulong userId)
         {
             if (arguments.Length > 2)
@@ -333,6 +335,7 @@
             if (player != null) Utility.SendPrivateMessageWithWaterMark(userId, $"[{rank}] #{player.playerNumber} {player.username} has {win} wins");
             else Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_NOT_FOUND);
         }
+
         static void HandleKDCommand(string[] arguments, ulong userId)
         {
             if (arguments.Length > 2)
@@ -358,6 +361,7 @@
             if (player != null) Utility.SendPrivateMessageWithWaterMark(userId, $"[{rank}] #{player.playerNumber} {player.username} has {kills} kills, {death} deaths, KD: {kd}");       
             else Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_NOT_FOUND);    
         }
+
         static void HandleStatsCommand(string[] arguments, ulong userId)
         {
             if (arguments.Length > 3)
@@ -408,53 +412,55 @@
                     break;
             }
         }
+
         private static void SendCGGOStats(ulong userId, Utility.PlayerData playerData)
         {
             Utility.SendPrivateMessageWithWaterMark(userId, $"CGGO Stats");
 
             if (playerData.CGGOPlayed > 0)
             {
-                Utility.SendPrivateMessageWithWaterMark(userId, $"GamePlayed: {playerData.CGGOPlayed}, WinRate: {((float)(playerData.CGGOWon * 100) / playerData.CGGOPlayed).ToString("F1")}%");
+                Utility.SendPrivateMessageWithWaterMark(userId, $"GamePlayed: {playerData.CGGOPlayed}, WinRate: {((float)(playerData.CGGOWon * 100) / playerData.CGGOPlayed):F1}%");
             }
             else
             {
                 Utility.SendPrivateMessageWithWaterMark(userId, $"GamePlayed: {playerData.CGGOPlayed}, WinRate: N/A");
             }
 
-            Utility.SendPrivateMessageWithWaterMark(userId, $"H.Shot%: {(playerData.CGGOHeadShotPercent * 100).ToString("F1")}%, B.Shot%: {(playerData.CGGOBodyShotPercent * 100).ToString("F1")}%, L.Shot%: {(playerData.CGGOLegsShotPercent * 100).ToString("F1")}%");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"Defuse%: {(playerData.CGGODefusePercent * 100).ToString("F1")}%, EcoScore%: {((1 - playerData.AverageCGGOMoneyEfficiency) * 100).ToString("F1")}%");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"AvgKills: {playerData.AverageCGGOKill.ToString("F1")}, AvgDeaths: {playerData.AverageCGGODeath:F1}, AvgAssists: {playerData.AverageCGGOAssist.ToString("F1")}");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"AvgDam.Dealt: {playerData.AverageCGGODamageDealt.ToString("F1")}, AvgDam.Received: {playerData.AverageCGGODamageReceived.ToString("F1")}");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"AvgBattleScore: {(playerData.AverageCGGOScore * 100).ToString("F1")}");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"H.Shot%: {(playerData.CGGOHeadShotPercent * 100):F1}%, B.Shot%: {(playerData.CGGOBodyShotPercent * 100):F1}%, L.Shot%: {(playerData.CGGOLegsShotPercent * 100):F1}%");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"Defuse%: {(playerData.CGGODefusePercent * 100):F1}%, EcoScore%: {((1 - playerData.AverageCGGOMoneyEfficiency) * 100):F1}%");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"AvgKills: {playerData.AverageCGGOKill:F1}, AvgDeaths: {playerData.AverageCGGODeath:F1}, AvgAssists: {playerData.AverageCGGOAssist:F1}");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"AvgDam.Dealt: {playerData.AverageCGGODamageDealt:F1}, AvgDam.Received: {playerData.AverageCGGODamageReceived:F1}");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"AvgBattleScore: {(playerData.AverageCGGOScore * 100):F1}");
         }
         private static void SendDetailedStats(ulong userId, Utility.PlayerData playerData, string steamId)
         {
             Utility.SendPrivateMessageWithWaterMark(userId, $"Detailed Stats");
             Utility.SendPrivateMessageWithWaterMark(userId, $"LeaderboardRank: {Utility.GetPlayerPlacement(playersListFilePath, steamId)}/{Utility.GetLineCount(playersListFilePath)}");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"Rank: {playerData.Rank}, Elo: {playerData.Elo.ToString("F1")}, High Elo: {playerData.HighestElo.ToString("F1")}");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"Rank: {playerData.Rank}, Elo: {playerData.Elo:F1}, High Elo: {playerData.HighestElo:F1}");
 
             string kdRatio = playerData.Death == 0 ? "1" : (playerData.Kills / (float)playerData.Death).ToString("F1");
             Utility.SendPrivateMessageWithWaterMark(userId, $"Win: {playerData.Win}, Kills: {playerData.Kills}, Death: {playerData.Death}, K/D: {kdRatio}");
 
             Utility.SendPrivateMessageWithWaterMark(userId, $"GamePlayed: {playerData.GamePlayed}, Level: {playerData.Level}");
             Utility.SendPrivateMessageWithWaterMark(userId, $"TimePlayed: {Utility.ConvertSecondsToFormattedTime((int)playerData.TotalTimePlayed)}");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"Moonw%: {(playerData.MoonwalkPercent * 100).ToString("F1")}%, AvgSpeed: {playerData.AverageSpeed.ToString("F1")}");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"Moonw%: {(playerData.MoonwalkPercent * 100):F1}%, AvgSpeed: {playerData.AverageSpeed:F1}");
             Utility.SendPrivateMessageWithWaterMark(userId, $"totRound:{playerData.RoundPlayed}, SteamId:{steamId}");
         }
         private static void SendGeneralStats(ulong userId, Utility.PlayerData playerData, string steamId)
         {
             Utility.SendPrivateMessageWithWaterMark(userId, $"General Stats");
             Utility.SendPrivateMessageWithWaterMark(userId, $"LeaderboardRank: {Utility.GetPlayerPlacement(playersListFilePath, steamId)}/{Utility.GetLineCount(playersListFilePath)}");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"Rank: {playerData.Rank}, Elo: {playerData.Elo.ToString("F1")}, High Elo: {playerData.HighestElo.ToString("F1")}");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"Rank: {playerData.Rank}, Elo: {playerData.Elo:F1}, High Elo: {playerData.HighestElo:F1}");
 
             string kdRatio = playerData.Death == 0 ? "1" : (playerData.Kills / (float)playerData.Death).ToString("F1");
             Utility.SendPrivateMessageWithWaterMark(userId, $"Win: {playerData.Win}, Kills: {playerData.Kills}, Death: {playerData.Death}, K/D: {kdRatio}");
 
             Utility.SendPrivateMessageWithWaterMark(userId, $"GamePlayed: {playerData.GamePlayed}, Level: {playerData.Level}");
             Utility.SendPrivateMessageWithWaterMark(userId, $"TimePlayed: {Utility.ConvertSecondsToFormattedTime((int)playerData.TotalTimePlayed)}");
-            Utility.SendPrivateMessageWithWaterMark(userId, $"Moonw%: {playerData.MoonwalkPercent.ToString("F1")}, AvgSpeed: {playerData.AverageSpeed.ToString("F1")}");
+            Utility.SendPrivateMessageWithWaterMark(userId, $"Moonw%: {playerData.MoonwalkPercent:F1}, AvgSpeed: {playerData.AverageSpeed:F1}");
             Utility.SendPrivateMessageWithWaterMark(userId, $"totRound:{playerData.RoundPlayed}, SteamId:{steamId}");
         }
+
         static void HandleKillCommand(string[] arguments)
         {
             if (arguments.Length != 2)
@@ -485,6 +491,7 @@
             if (player != null) ServerSend.PlayerDied(player.steamProfile.m_SteamID, player.steamProfile.m_SteamID, Vector3.zero);
             else Utility.SendServerMessage(CommandMessages.PLAYER_NOT_FOUND);
         }
+
         static void HandleGiveCommand(string[] arguments)
         {
             if (arguments.Length < 3) return;
@@ -526,6 +533,7 @@
                 else GameServer.ForceGiveWeapon(ulong.Parse(steamId), weaponId, Variables.weaponId);
             }
         }
+
         static void HandleBanCommand(string[] arguments)
         {
             if (arguments.Length < 2)
@@ -558,6 +566,7 @@
 
             LobbyManager.Instance.KickPlayer(player.steamProfile.m_SteamID);
         }
+
         static long GetUnixTimeWithIncrement(string timeIncrement)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
@@ -573,6 +582,7 @@
                 _ => throw new ArgumentException("Invalid time unit. Use 's', 'm', 'd', or 'y'.")
             };
         }
+
         static void HandleKickCommand(string[] arguments)
         {
             if (arguments.Length != 2)
@@ -598,6 +608,7 @@
             else Utility.SendServerMessage(CommandMessages.PLAYER_NOT_FOUND);
             
         }
+
         static void HandlePermsCommand(string[] arguments)
         {
             if (arguments.Length != 2)
@@ -622,6 +633,7 @@
             }
             else Utility.SendServerMessage(CommandMessages.PLAYER_NOT_FOUND); 
         }
+
         static void HandleModifCommand(string[] arguments)
         {
             if (arguments.Length != 4)
@@ -645,6 +657,7 @@
             
             else Utility.SendServerMessage(CommandMessages.PLAYER_NOT_FOUND);
         }
+
         static void HandleTeamCommand(string[] arguments)
         {
             if (!isCGGOActive) return;
@@ -674,6 +687,7 @@
             isCGGORanked = false;
             ResetCGGO(true);
         }
+
         static void AssignPlayersToTeam(List<string> playerIdentifiers, int teamId, List<CGGOPlayer> valorantPlayerList)
         {
             foreach (var identifier in playerIdentifiers)
@@ -685,6 +699,7 @@
                 if (player != null) valorantPlayerList.Add(new CGGOPlayer(player, teamId));
             }
         }
+
         static void HandleGetCommand(string[] arguments)
         {
             if (arguments.Length != 3)
@@ -707,11 +722,13 @@
             if (player != null) Utility.SendServerMessage($"#{player.playerNumber} {player.username} {arguments[2]}: {value}");
             else Utility.SendServerMessage(CommandMessages.PLAYER_NOT_FOUND);
         }
+
         static void HandleResetCommand()
         {
             ResetCGGO(false);
             ServerSend.LoadMap(6, 0);
         }
+
         static void HandleTimeCommand(string[] arguments)
         {
             if (arguments.Length != 2 || !float.TryParse(arguments[1], out float time))
@@ -722,6 +739,7 @@
 
             UnityEngine.Object.FindObjectOfType<GameManager>().gameMode.SetGameModeTimer(time, 1);
         }
+
         static void HandleMapCommand(string[] arguments)
         {
             if (arguments.Length != 3 || !int.TryParse(arguments[1], out int firstNumber) || !int.TryParse(arguments[2], out int secondNumber))
@@ -732,6 +750,7 @@
 
             ServerSend.LoadMap(firstNumber, secondNumber);
         }
+
         static void HandleWeaponPurchase(ulong userId, CGGOPlayer player, int cost, int weaponId, List<int> weaponList)
         {
             if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive || !publicBuyPhase || player.Balance < cost) return;
@@ -752,6 +771,7 @@
                 Utility.Log(logFilePath, $"Error giving weapon {weaponId} to player {userId}: {ex}");
             }
         }
+
         static void HandleShieldPurchase(CGGOPlayer player, int cost, int shieldValue)
         {
             if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive || !publicBuyPhase || player.Shield >= shieldValue || player.Balance < cost) return;
@@ -759,35 +779,44 @@
             player.Balance -= cost;
             player.Shield = shieldValue;
         }
+
         static bool IsCommand(string msg) => msg.StartsWith("!") || msg.StartsWith("/");
+
         static void HandleAdminHelpCommand()
         {
             Utility.SendServerMessage(CommandMessages.ADMIN_HELP_1);
             Utility.SendServerMessage(CommandMessages.ADMIN_HELP_2);
         }
+
         static void HandleModoHelpCommand()
         {
             Utility.SendServerMessage(CommandMessages.MODO_HELP_1);
             Utility.SendServerMessage(CommandMessages.MODO_HELP_2);
         }
+
         static void HandlePlayerHelpCommand(ulong userId)
         {
             Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_HELP_1);
             Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_HELP_2);
         }
+
         static void HandleGenericToggleCommand(ref bool flag, string msg)
         {
             flag = !flag;
             Utility.SendServerMessage(flag ? $"{msg} ON" : $"{msg} OFF");
         }
+
         static void HandleStartCommand() => GameLoop.Instance.StartGames();
         static void HandleRenameCommand(string msg)
         {
             SteamMatchmaking.SetLobbyData((CSteamID)SteamManager.Instance.currentLobby.m_SteamID, "LobbyName", msg.Replace("!rename", ""));
             Utility.SendServerMessage(CommandMessages.RENAME_SERVER);
         }
+
         static void HandleDiscordCommand(ulong userId) => Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.DISCORD);
+
         static void HandleDevCommand(ulong userId) => Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.DEV);
+
         static void HandleGenericLanguageCommand(ulong userId, string msg, string language)
         {
             Utility.SendPrivateMessageWithWaterMark(userId, msg);

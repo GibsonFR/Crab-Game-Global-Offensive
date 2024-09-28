@@ -6,7 +6,7 @@
 
         string[] tutorialCurrentMessages = [];
 
-        int respawnIndexTuto = 0, winnerTeam, cinematicDummy = 0, CheaterDetectedMessageState = 0, BombDummy, bombId, buyPhaseMessageState = 0, plantingPhaseMessageState = 0, defusePhaseMessageState = 0, totalTeamScore = 0, tutorialCurrentMessageIndex = 0, siteId = -1;
+        int respawnIndexTuto = 0, winnerTeamId, cinematicDummy = 0, CheaterDetectedMessageState = 0, BombDummy, bombId, buyPhaseMessageState = 0, plantingPhaseMessageState = 0, defusePhaseMessageState = 0, totalTeamScore = 0, tutorialCurrentMessageIndex = 0, siteId = -1;
 
         public static int publicBombId, publicGrenadeId;
 
@@ -230,7 +230,7 @@
             List<CGGOPlayer> rankedPlayers = new List<CGGOPlayer>();
             List<double> rankedPlayersScores = new List<double>();
 
-            if (winnerTeam == 0)
+            if (winnerTeamId == 0)
             {
 
                 for (int i = 0; i < publicDefendersList.Count() && i < publicAttackersList.Count(); i++)
@@ -271,17 +271,16 @@
 
             for (int i = 0; i < rankedPlayers.Count; i++)
             {
-                EloFunctions.UpdateEloCGGO(rankedPlayers[i], totalCGGOPlayer, totalCGGOGameExpectative, i + 1, averageCGGOElo, 50, winnerTeam);
+                StatsFunctions.UpdatePlayerStats(rankedPlayers[i], winnerTeamId);
+                EloFunctions.UpdateEloCGGO(rankedPlayers[i], totalCGGOPlayer, totalCGGOGameExpectative, i + 1, averageCGGOElo, kFactor);
                 EloFunctions.UpdatePlayerRank(rankedPlayers[i].SteamId.ToString());
             }
             Utility.ProcessPlayerFiles(playersListFilePath);
         }
         void SendEndGameMessage(List<CGGOPlayer> rankedPlayers, List<double> rankedScoresPlayers)
         {
-            if (winnerTeam == 0)
-                Utility.SendServerMessage("GAME ENDED ---- ATTACKERS WON ---- GAME ENDED");
-            else
-                Utility.SendServerMessage("GAME ENDED ---- DEFENDERS WON ---- GAME ENDED");
+            if (winnerTeamId == 0) Utility.SendServerMessage("GAME ENDED ---- ATTACKERS WON ---- GAME ENDED");
+            else Utility.SendServerMessage("GAME ENDED ---- DEFENDERS WON ---- GAME ENDED");
 
             // Assurez-vous que les listes contiennent au moins 5 éléments avant d'accéder à leurs indices
             for (int i = 0; i < Math.Min(5, rankedPlayers.Count); i++)
@@ -290,7 +289,7 @@
                 if (i == 0)
                     rankMessage += "[MVP] ";
 
-                rankMessage += $"{TeamIdToString(rankedPlayers[i].Team)}{rankedPlayers[i].Username} Score = {(rankedScoresPlayers[i] * 100).ToString("F1")}";
+                rankMessage += $"{TeamIdToString(rankedPlayers[i].Team)}{rankedPlayers[i].Username} Score = {rankedScoresPlayers[i] * 100:F1}";
                 Utility.SendServerMessage(rankMessage);
             }
         }
@@ -499,14 +498,14 @@
             {
                 if (IsAttackersScoreMax() && !IsCurrentPhaseGameEnded())
                 {
-                    winnerTeam = 0;
+                    winnerTeamId = 0;
                     EndGameRankPlayers();
                     SetCurrentPhaseGameEnded();
                     return;
                 }
                 if (IsDefendersScoreMax() && !IsCurrentPhaseGameEnded())
                 {
-                    winnerTeam = 1;
+                    winnerTeamId = 1;
                     EndGameRankPlayers();
                     SetCurrentPhaseGameEnded();
                     return;

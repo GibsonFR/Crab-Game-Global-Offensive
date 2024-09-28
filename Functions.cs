@@ -1034,7 +1034,7 @@ namespace GibsonCrabGameGlobalOffensive
                             valorantPlayer.CheatFlag += 1;
 
                         }
-                        return $"<color=red>[GAC]</color> [C] FastFire [{lastItemName.Replace("(Clone)", "")}] | #{playerNumber} {username} | last use: {timeDifference.TotalMilliseconds.ToString("F1")} ms";
+                        return $"<color=red>[GAC]</color> [C] FastFire [{lastItemName.Replace("(Clone)", "")}] | #{playerNumber} {username} | last use: {timeDifference.TotalMilliseconds:F1} ms";
                     }
                     else
                     {
@@ -1074,7 +1074,7 @@ namespace GibsonCrabGameGlobalOffensive
 
                             Utility.Log(logFilePath, $"Sus flag: {valorantPlayer.Username}, {valorantPlayer.SteamId} for GunUsedTooFast time:{timeDifference.TotalMilliseconds}");
                         }
-                        return $"<color=red>[GAC]</color>  [C] FastFire [Gun] | #{playerNumber} {username} | last use: {timeDifference.TotalMilliseconds.ToString("F1")} ms";
+                        return $"<color=red>[GAC]</color>  [C] FastFire [Gun] | #{playerNumber} {username} | last use: {timeDifference.TotalMilliseconds:F1} ms";
                     }
                     else
                     {

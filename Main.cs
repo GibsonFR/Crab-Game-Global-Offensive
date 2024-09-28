@@ -429,7 +429,11 @@
             var cggoPlayer = CGGOPlayer.GetCGGOPlayer(steamId);
             if (cggoPlayer != null)
             {
-                if (isCGGORanked) EloFunctions.UpdateEloCGGO(cggoPlayer, totalCGGOPlayer, totalCGGOGameExpectative, cggoPlayersList.Count(), averageCGGOElo, 50, -1);
+                if (isCGGORanked)
+                {
+                    StatsFunctions.UpdatePlayerStats(cggoPlayer, -1);
+                    EloFunctions.UpdateEloCGGO(cggoPlayer, totalCGGOPlayer, totalCGGOGameExpectative, cggoPlayersList.Count(), averageCGGOElo, kFactor);
+                }
 
                 cggoPlayersList.Remove(cggoPlayer);
             }
