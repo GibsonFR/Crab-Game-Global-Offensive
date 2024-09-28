@@ -20,12 +20,6 @@
         public static string wordsFilterFilePath = mainFolderPath + @"wordsFilter.txt";
         public static string permsFilePath = mainFolderPath + @"perms.txt";
 
-
-        //Manager
-        public static PlayerMovement clientMovement;
-        public static PlayerInventory clientInventory;
-        public static PlayerStatus clientStatus;
-
         //Camera
         public static Camera camera;
 
@@ -79,10 +73,10 @@
         public static ulong clientId;
 
         //string
-        public static string gameState, lastGameState, menuKey = "f5", lastItemName = "null", otherPlayerUsername, layout, displayButton0, displayButton1, displayButton2, displayButton3, displayButton4, displayButton5, displayButton6, displayButton7, customPrecisionFormatTargetPosition = "F1", customPrecisionFormatClientRotation = "F1";
+        public static string menuKey = "f5", lastItemName = "null", otherPlayerUsername, layout, displayButton0, displayButton1, displayButton2, displayButton3, displayButton4, displayButton5, displayButton6, displayButton7, customPrecisionFormatTargetPosition = "F1", customPrecisionFormatClientRotation = "F1";
 
         //bool
-        public static bool isTutoDone, isCGGORanked,tuto, startRound, makeCGGOTeam, isCGGOActive, muteChat, wordsFilter, displayRankInChat, snowballs, GAC, onButton, onSubButton, menuTrigger, clientIsDead;
+        public static bool isTutoDone, isCGGORanked,tuto, startRound, CGGOTeamSet, isCGGOActive, muteChat, wordsFilter, displayRankInChat, snowballs, GAC, onButton, onSubButton, menuTrigger, clientIsDead;
 
         //bool[]
         public static bool[] buttonStates = new bool[8];
