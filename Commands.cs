@@ -202,24 +202,31 @@
         }
         static void HandleReportCommand(string[] arguments, ulong userId, string param_1)
         {
-            string identifier = arguments[1];
-            string steamId = GameData.commandPlayerFinder(identifier);
-            if (steamId != null)
+            if (arguments.Length < 2)
             {
-                PlayerManager reported = GameData.GetPlayer(steamId);
-                PlayerManager reporter = GameData.GetPlayer(userId.ToString());
-
-                Utility.Log(playersReportFilePath, $"[{userId}] {reporter.username} reported [{steamId}] {reported.username} | message : {param_1}");
+                Utility.SendPrivateMessageWithWaterMark(userId, $"{CommandMessages.INVALID_ARGUMENT} !report playerName message");
+                return;
             }
-            else
+
+            string steamId = (arguments.Length >= 2) ? GameData.commandPlayerFinder(arguments[1]) : null;
+
+            if (steamId == null)
             {
                 Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_NOT_FOUND);
                 return;
             }
 
-            Utility.SendPrivateMessageWithWaterMark(userId, "Report sent");
-            return;
+            var reported = GameData.GetPlayer(steamId);
+            var reporter = GameData.GetPlayer(userId.ToString());
+
+            if (reported != null && reporter != null)
+            {
+                Utility.Log(playersReportFilePath, $"[{userId}] {reporter.username} reported [{steamId}] {reported.username} | message: {param_1}");
+                Utility.SendPrivateMessageWithWaterMark(userId, "Report sent");
+            }
+            else Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_NOT_FOUND);  
         }
+
         static void HandleEloCommand(string[] arguments, ulong userId)
         {
             if (arguments.Length > 2)
