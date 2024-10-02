@@ -2520,23 +2520,6 @@
 
     public class CGGOPatchs
     {
-        // Dont let the timer UI update, to display shield instead
-        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.SendGameModeTimer), [typeof(ulong), typeof(float), typeof(int)])]
-        [HarmonyPrefix]
-        public static bool OnServerSendTimerPre(ulong __0, ref float __1, int __2)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return true;
-
-            var cggoPlayer = CGGOPlayer.GetCGGOPlayer(__0);
-            if (cggoPlayer != null)
-            {
-                // Update shield value instead of round timer
-                if (__1 == cggoPlayer.Shield) return true;
-                else return false;
-            }
-            else return true;
-        }
-
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.PlayerDied))]
         [HarmonyPrefix]
         public static void OnServerSendPlayerDiedPre(ref ulong __0, ref ulong __1)

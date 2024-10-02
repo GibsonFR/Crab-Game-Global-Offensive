@@ -230,20 +230,20 @@ namespace GibsonCrabGameGlobalOffensive
                 publicBombId = weaponId;
 
                 // Give the player a grenade, so it goes in 4th slot, instead of the bomb
-                GameServer.ForceGiveWeapon(steamId, (int)WeaponsId.GRENADE_ID, publicBombId);
+                GameServer.ForceGiveWeapon(steamId, WeaponsId.GRENADE_ID, publicBombId);
 
                 // Reassign the player's weapon based on whether they previously had a Katana or Knife
                 if (player.Katana)
                 {
                     weaponId++;
-                    GameServer.ForceGiveWeapon(steamId, (int)WeaponsId.KATANA_ID, weaponId);
+                    GameServer.ForceGiveWeapon(steamId, WeaponsId.KATANA_ID, weaponId);
                     player.KatanaId = weaponId; // Update the player's Katana ID
                     publicKatanaList.Add(weaponId); // Add the new Katana to the public list
                 }
                 else
                 {
                     weaponId++;
-                    GameServer.ForceGiveWeapon(steamId, (int)WeaponsId.KNIFE_ID, weaponId); // Assign a knife if no Katana
+                    GameServer.ForceGiveWeapon(steamId, WeaponsId.KNIFE_ID, weaponId); // Assign a knife if no Katana
                 }
 
                 return;
@@ -251,7 +251,7 @@ namespace GibsonCrabGameGlobalOffensive
             else
             {
                 // Update the player's weapon memory based on the shared object ID
-                WeaponsFunctions.UpdatePlayerWeaponMemoryOnPickUp(sharedObjectId, player);
+                UpdatePlayerWeaponMemoryOnPickUp(sharedObjectId, player);
                 return;
             }
         }
@@ -267,7 +267,7 @@ namespace GibsonCrabGameGlobalOffensive
             if (!Utility.IsHostAndCGGOActive()) return true;
 
             // Allow all other items to be dropped
-            if (weaponId != (int)WeaponsId.BOMB_ID && weaponId != (int)WeaponsId.GRENADE_ID) return true;
+            if (weaponId != WeaponsId.BOMB_ID && weaponId != WeaponsId.GRENADE_ID) return true;
 
             var player = CGGOPlayer.GetCGGOPlayer(steamId);
             if (player == null) return true; // Exit early if the player is not in CGGO
@@ -276,6 +276,22 @@ namespace GibsonCrabGameGlobalOffensive
             if (player.Team == (int)TeamsId.Attackers) return true; // Allow bomb drop for attackers
             else return false; // Block bomb drop for defenders
         }
+
+        // Don't let the game timer UI update; instead, display the player's shield value
+        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.SendGameModeTimer), new[] { typeof(ulong), typeof(float), typeof(int) })]
+        [HarmonyPrefix]
+        public static bool OnServerSendTimerPre(ulong __0, ref float __1, int __2)
+        {
+            if (!Utility.IsHostAndCGGOActive()) return true;
+
+            var player = CGGOPlayer.GetCGGOPlayer(__0);
+            if (player != null) return true; // If the player isn't participating in CGGO, exit early
+
+            if (__1 == player.Shield) return true;// If the shield value matches the current timer (__1), allow the timer UI update
+            else return false; // Otherwise, block the timer UI update to display the shield value instead of the round timer
+
+        }
+
 
         // Custom Weapon Damage system
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.PlayerDamage))]
