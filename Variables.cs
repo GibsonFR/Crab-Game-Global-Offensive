@@ -44,16 +44,10 @@
         public static List<ulong> playersInRanked = [];
         public static List<int> cggoScore = [0,0];
         public static List<ulong> permsPlayers = [];
-        public class LoseStrike
+        public class LoseStrike(int key, int value)
         {
-            public int Key { get; set; }
-            public int Value { get; set; }
-
-            public LoseStrike(int key, int value)
-            {
-                Key = key;
-                Value = value;
-            }
+            public int Key { get; set; } = key;
+            public int Value { get; set; } = value;
         }
         public static LoseStrike loseStrike = new(-1, 0);
 
@@ -64,7 +58,7 @@
         public static GameObject clientObject;
 
         // int
-        public static int totalCGGOPlayer = 0, weaponId = 5000, nextMapTime, roundCount, playersThisGame, messageSenderId = 2, spawnId, afkCheckDuration, mapTimer, playerToAutoStart, topPlayer = 40, mapId, modeId, messageTimer, menuSelector, subMenuSelector, playerIndex, statusTrigger, menuSpeed = 5, menuSpeedHelperFast, menuSpeedHelper, alertLevel = 0, kFactor = 50, clownRatingCeiling = 750, woodRatingCeiling = 850, silverRatingCeiling = 950, goldRatingCeiling = 1050, platinumRatingCeiling = 1100, diamondRatingCeiling = 1150, masterRatingCeiling = 1200, grandMasterRatingCeiling = 1300, challengerRatingCeiling = 2000;
+        public static int totalCGGOPlayer = 0, weaponId = 5000, nextMapTime, roundCount, playersThisGame, messageSenderId = 2, spawnId, afkCheckDuration, mapTimer, playerToAutoStart, topPlayer = 40, mapId, modeId, messageTimer, menuSelector, subMenuSelector, playerIndex, statusTrigger, menuSpeed = 5, menuSpeedHelperFast, menuSpeedHelper, alertLevel = 0, kFactor = 50, clownRatingCeiling = 750, woodRatingCeiling = 850, silverRatingCeiling = 950, goldRatingCeiling = 1050, platinumRatingCeiling = 1100, diamondRatingCeiling = 1150, masterRatingCeiling = 1200, grandMasterRatingCeiling = 1300, challengerRatingCeiling = 2000, originalBombId;
 
         // float
         public static float averageCGGOElo=0f, totalCGGOGameExpectative=0f, averageGameElo, factorValue, totalGameExpectative, smoothedSpeed, smoothingFactor = 0.7f, checkFrequency = 0.02f, ratingDifferenceScale = 400f;

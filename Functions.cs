@@ -1,10 +1,12 @@
 ﻿
 namespace GibsonCrabGameGlobalOffensive
 {
-    //Ici on stock les fonctions, dans des class pour la lisibilité du code dans Plugin.cs 
-    //Cette class regroupe un ensemble de fonction plus ou moins utile
     public class Utility
     {
+        public static bool IsHostAndCGGOActive()
+        {
+            return SteamManager.Instance.IsLobbyOwner() && isCGGOActive;
+        }
         public static int GetLineCount(string filePath)
         {
             try
@@ -82,225 +84,223 @@ namespace GibsonCrabGameGlobalOffensive
         }
         public static PlayerData ReadPlayerData(string filePath)
         {
-            PlayerData player = new PlayerData();
+            PlayerData player = new();
             try
             {
-                using (StreamReader sr = new StreamReader(filePath))
+                using StreamReader sr = new(filePath);
+                string line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
+                    string[] parts = line.Split(':');
+                    if (parts.Length == 2)
                     {
-                        string[] parts = line.Split(':');
-                        if (parts.Length == 2)
-                        {
-                            string key = parts[0].Trim();
-                            string value = parts[1].Trim();
+                        string key = parts[0].Trim();
+                        string value = parts[1].Trim();
 
-                            try
+                        try
+                        {
+                            switch (key)
                             {
-                                switch (key)
-                                {
-                                    case "username":
-                                        player.Username = value; 
-                                        break;
-                                    case "rank":
-                                        player.Rank = value;
-                                        break;
-                                    case "elo":
-                                        if (!float.TryParse(value, out float elo))
-                                        {
-                                            throw new FormatException($"Invalid value for elo: {value}");
-                                        }
-                                        player.Elo = elo;
-                                        break;
-                                    case "highestElo":
-                                        if (!float.TryParse(value, out float highestElo))
-                                        {
-                                            throw new FormatException($"Invalid value for highestElo: {value}");
-                                        }
-                                        player.HighestElo = highestElo;
-                                        break;
-                                    case "gamePlayed":
-                                        if (!float.TryParse(value, out float gamePlayed))
-                                        {
-                                            throw new FormatException($"Invalid value for gamePlayed: {value}");
-                                        }
-                                        player.GamePlayed = gamePlayed;
-                                        break;
-                                    case "level":
-                                        if (!float.TryParse(value, out float level))
-                                        {
-                                            throw new FormatException($"Invalid value for level: {value}");
-                                        }
-                                        player.Level = level;
-                                        break;
-                                    case "win":
-                                        if (!float.TryParse(value, out float win))
-                                        {
-                                            throw new FormatException($"Invalid value for win: {value}");
-                                        }
-                                        player.Win = win;
-                                        break;
-                                    case "kills":
-                                        if (!float.TryParse(value, out float kills))
-                                        {
-                                            throw new FormatException($"Invalid value for kills: {value}");
-                                        }
-                                        player.Kills = kills;
-                                        break;
-                                    case "death":
-                                        if (!float.TryParse(value, out float death))
-                                        {
-                                            throw new FormatException($"Invalid value for death: {value}");
-                                        }
-                                        player.Death = death;
-                                        break;
-                                    case "averageRoundDuration":
-                                        if (!float.TryParse(value, out float averageTimePlayed))
-                                        {
-                                            throw new FormatException($"Invalid value for averageRoundDuration: {value}");
-                                        }
-                                        player.AverageRoundDuration = averageTimePlayed;
-                                        break;
-                                    case "totalTimePlayed":
-                                        if (!float.TryParse(value, out float totalTimePlayed))
-                                        {
-                                            throw new FormatException($"Invalid value for totalTimePlayed: {value}");
-                                        }
-                                        player.TotalTimePlayed = totalTimePlayed;
-                                        break;
-                                    case "roundPlayed":
-                                        if (!int.TryParse(value, out int roundPlayed))
-                                        {
-                                            throw new FormatException($"Invalid value for roundPlayed: {value}");
-                                        }
-                                        player.RoundPlayed = roundPlayed;
-                                        break;
-                                    case "averageSpeed":
-                                        if (!float.TryParse(value, out float averageSpeed))
-                                        {
-                                            throw new FormatException($"Invalid value for averageSpeed: {value}");
-                                        }
-                                        player.AverageSpeed = averageSpeed;
-                                        break;
-                                    case "averageConcurrent":
-                                        if (!float.TryParse(value, out float averageConcurrent))
-                                        {
-                                            throw new FormatException($"Invalid value for averageConcurrent: {value}");
-                                        }
-                                        player.AverageConcurrent = averageConcurrent;
-                                        break;
-                                    case "averageEloDelta":
-                                        if (!float.TryParse(value, out float averageEloDelta))
-                                        {
-                                            throw new FormatException($"Invalid value for averageEloDelta: {value}");
-                                        }
-                                        player.AverageEloDelta = averageEloDelta;
-                                        break;
-                                    case "moonwalkPercent":
-                                        if (!float.TryParse(value, out float moonwalkPercent))
-                                        {
-                                            throw new FormatException($"Invalid value for moonwalkPercent: {value}");
-                                        }
-                                        player.MoonwalkPercent = moonwalkPercent;
-                                        break;
-                                    case "CGGOPlayed":
-                                        if (!int.TryParse(value, out int CGGOPlayed))
-                                        {
-                                            throw new FormatException($"Invalid value for CGGOPlayed: {value}");
-                                        }
-                                        player.CGGOPlayed = CGGOPlayed;
-                                        break;
-                                    case "CGGOWon":
-                                        if (!int.TryParse(value, out int CGGOWon))
-                                        {
-                                            throw new FormatException($"Invalid value for CGGOWon: {value}");
-                                        }
-                                        player.CGGOWon = CGGOWon;
-                                        break;
-                                    case "averageCGGOHeadShot":
-                                        if (!float.TryParse(value, out float averageCGGOHeadShot))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGOHeadShot: {value}");
-                                        }
-                                        player.CGGOHeadShotPercent = averageCGGOHeadShot;
-                                        break;
-                                    case "averageCGGOBodyShot":
-                                        if (!float.TryParse(value, out float averageCGGOBodyShot))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGOBodyShot: {value}");
-                                        }
-                                        player.CGGOBodyShotPercent = averageCGGOBodyShot;
-                                        break;
-                                    case "averageCGGOLegsShot":
-                                        if (!float.TryParse(value, out float averageCGGOLegsShot))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGOLegsShot: {value}");
-                                        }
-                                        player.CGGOLegsShotPercent = averageCGGOLegsShot;
-                                        break;
-                                    case "averageCGGODefuse":
-                                        if (!float.TryParse(value, out float averageCGGODefuse))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGODefuse: {value}");
-                                        }
-                                        player.CGGODefusePercent = averageCGGODefuse;
-                                        break;
-                                    case "averageCGGOKill":
-                                        if (!float.TryParse(value, out float averageCGGOKill))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGOKill: {value}");
-                                        }
-                                        player.AverageCGGOKill = averageCGGOKill;
-                                        break;
-                                    case "averageCGGODeath":
-                                        if (!float.TryParse(value, out float averageCGGODeath))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGODeath: {value}");
-                                        }
-                                        player.AverageCGGODeath = averageCGGODeath;
-                                        break;
-                                    case "averageCGGOAssist":
-                                        if (!float.TryParse(value, out float averageCGGOAssist))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGOAssist: {value}");
-                                        }
-                                        player.AverageCGGOAssist = averageCGGOAssist;
-                                        break;
-                                    case "averageCGGODamageDealt":
-                                        if (!float.TryParse(value, out float averageCGGODamageDealt))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGODamageDealt: {value}");
-                                        }
-                                        player.AverageCGGODamageDealt = averageCGGODamageDealt;
-                                        break;
-                                    case "averageCGGODamageReceived":
-                                        if (!float.TryParse(value, out float averageCGGODamageReceived))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGODamageReceived: {value}");
-                                        }
-                                        player.AverageCGGODamageReceived = averageCGGODamageReceived;
-                                        break;
-                                    case "averageCGGOMoneyEfficiency":
-                                        if (!float.TryParse(value, out float averageCGGOMoneyEfficiency))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGOMoneyEfficiency: {value}");
-                                        }
-                                        player.AverageCGGOMoneyEfficiency = averageCGGOMoneyEfficiency;
-                                        break;
-                                    case "averageCGGOScore":
-                                        if (!float.TryParse(value, out float averageCGGOScore))
-                                        {
-                                            throw new FormatException($"Invalid value for averageCGGOScore: {value}");
-                                        }
-                                        player.AverageCGGOScore = averageCGGOScore;
-                                        break;
-                                }
+                                case "username":
+                                    player.Username = value;
+                                    break;
+                                case "rank":
+                                    player.Rank = value;
+                                    break;
+                                case "elo":
+                                    if (!float.TryParse(value, out float elo))
+                                    {
+                                        throw new FormatException($"Invalid value for elo: {value}");
+                                    }
+                                    player.Elo = elo;
+                                    break;
+                                case "highestElo":
+                                    if (!float.TryParse(value, out float highestElo))
+                                    {
+                                        throw new FormatException($"Invalid value for highestElo: {value}");
+                                    }
+                                    player.HighestElo = highestElo;
+                                    break;
+                                case "gamePlayed":
+                                    if (!float.TryParse(value, out float gamePlayed))
+                                    {
+                                        throw new FormatException($"Invalid value for gamePlayed: {value}");
+                                    }
+                                    player.GamePlayed = gamePlayed;
+                                    break;
+                                case "level":
+                                    if (!float.TryParse(value, out float level))
+                                    {
+                                        throw new FormatException($"Invalid value for level: {value}");
+                                    }
+                                    player.Level = level;
+                                    break;
+                                case "win":
+                                    if (!float.TryParse(value, out float win))
+                                    {
+                                        throw new FormatException($"Invalid value for win: {value}");
+                                    }
+                                    player.Win = win;
+                                    break;
+                                case "kills":
+                                    if (!float.TryParse(value, out float kills))
+                                    {
+                                        throw new FormatException($"Invalid value for kills: {value}");
+                                    }
+                                    player.Kills = kills;
+                                    break;
+                                case "death":
+                                    if (!float.TryParse(value, out float death))
+                                    {
+                                        throw new FormatException($"Invalid value for death: {value}");
+                                    }
+                                    player.Death = death;
+                                    break;
+                                case "averageRoundDuration":
+                                    if (!float.TryParse(value, out float averageTimePlayed))
+                                    {
+                                        throw new FormatException($"Invalid value for averageRoundDuration: {value}");
+                                    }
+                                    player.AverageRoundDuration = averageTimePlayed;
+                                    break;
+                                case "totalTimePlayed":
+                                    if (!float.TryParse(value, out float totalTimePlayed))
+                                    {
+                                        throw new FormatException($"Invalid value for totalTimePlayed: {value}");
+                                    }
+                                    player.TotalTimePlayed = totalTimePlayed;
+                                    break;
+                                case "roundPlayed":
+                                    if (!int.TryParse(value, out int roundPlayed))
+                                    {
+                                        throw new FormatException($"Invalid value for roundPlayed: {value}");
+                                    }
+                                    player.RoundPlayed = roundPlayed;
+                                    break;
+                                case "averageSpeed":
+                                    if (!float.TryParse(value, out float averageSpeed))
+                                    {
+                                        throw new FormatException($"Invalid value for averageSpeed: {value}");
+                                    }
+                                    player.AverageSpeed = averageSpeed;
+                                    break;
+                                case "averageConcurrent":
+                                    if (!float.TryParse(value, out float averageConcurrent))
+                                    {
+                                        throw new FormatException($"Invalid value for averageConcurrent: {value}");
+                                    }
+                                    player.AverageConcurrent = averageConcurrent;
+                                    break;
+                                case "averageEloDelta":
+                                    if (!float.TryParse(value, out float averageEloDelta))
+                                    {
+                                        throw new FormatException($"Invalid value for averageEloDelta: {value}");
+                                    }
+                                    player.AverageEloDelta = averageEloDelta;
+                                    break;
+                                case "moonwalkPercent":
+                                    if (!float.TryParse(value, out float moonwalkPercent))
+                                    {
+                                        throw new FormatException($"Invalid value for moonwalkPercent: {value}");
+                                    }
+                                    player.MoonwalkPercent = moonwalkPercent;
+                                    break;
+                                case "CGGOPlayed":
+                                    if (!int.TryParse(value, out int CGGOPlayed))
+                                    {
+                                        throw new FormatException($"Invalid value for CGGOPlayed: {value}");
+                                    }
+                                    player.CGGOPlayed = CGGOPlayed;
+                                    break;
+                                case "CGGOWon":
+                                    if (!int.TryParse(value, out int CGGOWon))
+                                    {
+                                        throw new FormatException($"Invalid value for CGGOWon: {value}");
+                                    }
+                                    player.CGGOWon = CGGOWon;
+                                    break;
+                                case "averageCGGOHeadShot":
+                                    if (!float.TryParse(value, out float averageCGGOHeadShot))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGOHeadShot: {value}");
+                                    }
+                                    player.CGGOHeadShotPercent = averageCGGOHeadShot;
+                                    break;
+                                case "averageCGGOBodyShot":
+                                    if (!float.TryParse(value, out float averageCGGOBodyShot))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGOBodyShot: {value}");
+                                    }
+                                    player.CGGOBodyShotPercent = averageCGGOBodyShot;
+                                    break;
+                                case "averageCGGOLegsShot":
+                                    if (!float.TryParse(value, out float averageCGGOLegsShot))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGOLegsShot: {value}");
+                                    }
+                                    player.CGGOLegsShotPercent = averageCGGOLegsShot;
+                                    break;
+                                case "averageCGGODefuse":
+                                    if (!float.TryParse(value, out float averageCGGODefuse))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGODefuse: {value}");
+                                    }
+                                    player.CGGODefusePercent = averageCGGODefuse;
+                                    break;
+                                case "averageCGGOKill":
+                                    if (!float.TryParse(value, out float averageCGGOKill))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGOKill: {value}");
+                                    }
+                                    player.AverageCGGOKill = averageCGGOKill;
+                                    break;
+                                case "averageCGGODeath":
+                                    if (!float.TryParse(value, out float averageCGGODeath))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGODeath: {value}");
+                                    }
+                                    player.AverageCGGODeath = averageCGGODeath;
+                                    break;
+                                case "averageCGGOAssist":
+                                    if (!float.TryParse(value, out float averageCGGOAssist))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGOAssist: {value}");
+                                    }
+                                    player.AverageCGGOAssist = averageCGGOAssist;
+                                    break;
+                                case "averageCGGODamageDealt":
+                                    if (!float.TryParse(value, out float averageCGGODamageDealt))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGODamageDealt: {value}");
+                                    }
+                                    player.AverageCGGODamageDealt = averageCGGODamageDealt;
+                                    break;
+                                case "averageCGGODamageReceived":
+                                    if (!float.TryParse(value, out float averageCGGODamageReceived))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGODamageReceived: {value}");
+                                    }
+                                    player.AverageCGGODamageReceived = averageCGGODamageReceived;
+                                    break;
+                                case "averageCGGOMoneyEfficiency":
+                                    if (!float.TryParse(value, out float averageCGGOMoneyEfficiency))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGOMoneyEfficiency: {value}");
+                                    }
+                                    player.AverageCGGOMoneyEfficiency = averageCGGOMoneyEfficiency;
+                                    break;
+                                case "averageCGGOScore":
+                                    if (!float.TryParse(value, out float averageCGGOScore))
+                                    {
+                                        throw new FormatException($"Invalid value for averageCGGOScore: {value}");
+                                    }
+                                    player.AverageCGGOScore = averageCGGOScore;
+                                    break;
                             }
-                            catch (FormatException ex)
-                            {
-                                Utility.Log(logFilePath, $"Error parsing player data for key '{key}': {ex.Message}");
-                            }
+                        }
+                        catch (FormatException ex)
+                        {
+                            Utility.Log(logFilePath, $"Error parsing player data for key '{key}': {ex.Message}");
                         }
                     }
                 }
@@ -401,7 +401,7 @@ namespace GibsonCrabGameGlobalOffensive
 
         public static void ProcessPlayerFiles(string outputFilePath)
         {
-            Dictionary<string, PlayerData> playersData = new Dictionary<string, PlayerData>();
+            Dictionary<string, PlayerData> playersData = [];
 
             // Remplacez le chemin d'accès avec votre chemin réel
             string folderPath = playersDataFolderPath;
@@ -428,12 +428,10 @@ namespace GibsonCrabGameGlobalOffensive
                 var sortedPlayers = playersData.OrderByDescending(x => x.Value.Elo);
 
                 // Écrire les données triées dans le fichier de sortie
-                using (StreamWriter sw = new StreamWriter(outputFilePath))
+                using StreamWriter sw = new(outputFilePath);
+                foreach (var player in sortedPlayers)
                 {
-                    foreach (var player in sortedPlayers)
-                    {
-                        sw.WriteLine($"{player.Key};{player.Value.Username};{player.Value.Elo};{player.Value.CGGOWon};{player.Value.CGGOPlayed};{player.Value.AverageCGGOKill};{player.Value.AverageCGGODeath};{player.Value.AverageCGGOAssist};{player.Value.CGGOHeadShotPercent};{player.Value.CGGOBodyShotPercent};{player.Value.CGGOLegsShotPercent};{player.Value.AverageCGGODamageDealt};{player.Value.AverageCGGODamageReceived};{player.Value.AverageCGGOMoneyEfficiency};{player.Value.AverageCGGOScore}");
-                    }
+                    sw.WriteLine($"{player.Key};{player.Value.Username};{player.Value.Elo};{player.Value.CGGOWon};{player.Value.CGGOPlayed};{player.Value.AverageCGGOKill};{player.Value.AverageCGGODeath};{player.Value.AverageCGGOAssist};{player.Value.CGGOHeadShotPercent};{player.Value.CGGOBodyShotPercent};{player.Value.CGGOLegsShotPercent};{player.Value.AverageCGGODamageDealt};{player.Value.AverageCGGODamageReceived};{player.Value.AverageCGGOMoneyEfficiency};{player.Value.AverageCGGOScore}");
                 }
             }
             catch (Exception ex)
@@ -489,7 +487,7 @@ namespace GibsonCrabGameGlobalOffensive
                 Log(logFilePath, "Error[CreatePlayerFile] : " + ex.Message);
             }
         }
-        public static void processNewMessage(List<string> list, string newMessage)
+        public static void ProcessNewMessage(List<string> list, string newMessage)
         {
             for (int i = list.Count - 1; i > 0; i--)
             {
@@ -501,26 +499,24 @@ namespace GibsonCrabGameGlobalOffensive
         {
             try
             {
-                using (StreamReader sr = new StreamReader(filePath))
+                using StreamReader sr = new(filePath);
+                permsPlayers.Clear();
+                string line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    permsPlayers.Clear();
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        // Skip empty lines or lines that are just whitespace
-                        if (string.IsNullOrWhiteSpace(line))
-                            continue;
+                    // Skip empty lines or lines that are just whitespace
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
 
-                        // Ensure the line has at least one part before trying to split and parse it
-                        string[] parts = line.Split('|');
-                        if (parts.Length > 0 && ulong.TryParse(parts[0], out ulong playerId))
-                        {
-                            permsPlayers.Add(playerId);
-                        }
-                        else
-                        {
-                            Utility.Log(logFilePath, $"Error ReadPerms: Invalid line format or PlayerId in line '{line}'");
-                        }
+                    // Ensure the line has at least one part before trying to split and parse it
+                    string[] parts = line.Split('|');
+                    if (parts.Length > 0 && ulong.TryParse(parts[0], out ulong playerId))
+                    {
+                        permsPlayers.Add(playerId);
+                    }
+                    else
+                    {
+                        Utility.Log(logFilePath, $"Error ReadPerms: Invalid line format or PlayerId in line '{line}'");
                     }
                 }
             }
@@ -534,27 +530,25 @@ namespace GibsonCrabGameGlobalOffensive
         {
             try
             {
-                using (StreamReader sr = new StreamReader(filePath))
+                using StreamReader sr = new(filePath);
+                bannedPlayers.Clear();
+                string line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    bannedPlayers.Clear();
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        // Skip empty lines or lines that are just whitespace
-                        if (string.IsNullOrWhiteSpace(line))
-                            continue;
+                    // Skip empty lines or lines that are just whitespace
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
 
-                        // Ensure the line has at least 3 parts before trying to split and parse it
-                        string[] parts = line.Split('|');
-                        if (parts.Length > 2 && !string.IsNullOrWhiteSpace(parts[0]) && long.TryParse(parts[2], out long unbanDate))
-                        {
-                            string playerId = parts[0];
-                            bannedPlayers.Add(playerId, unbanDate);
-                        }
-                        else
-                        {
-                            Utility.Log(logFilePath, $"Error ReadBanned data: Invalid line format or unban date in line '{line}'");
-                        }
+                    // Ensure the line has at least 3 parts before trying to split and parse it
+                    string[] parts = line.Split('|');
+                    if (parts.Length > 2 && !string.IsNullOrWhiteSpace(parts[0]) && long.TryParse(parts[2], out long unbanDate))
+                    {
+                        string playerId = parts[0];
+                        bannedPlayers.Add(playerId, unbanDate);
+                    }
+                    else
+                    {
+                        Utility.Log(logFilePath, $"Error ReadBanned data: Invalid line format or unban date in line '{line}'");
                     }
                 }
             }
@@ -570,16 +564,14 @@ namespace GibsonCrabGameGlobalOffensive
             wordsFilterList.Add("ezrgpjbzj");
             try
             {
-                using (StreamReader sr = new StreamReader(filePath))
+                using StreamReader sr = new(filePath);
+                string line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        string word = line;
+                    string word = line;
 
-                        wordsFilterList.Add(word);
+                    wordsFilterList.Add(word);
 
-                    }
                 }
             }
             catch (Exception ex)
@@ -615,8 +607,10 @@ namespace GibsonCrabGameGlobalOffensive
 
             bytes.InsertRange(0, BitConverter.GetBytes(bytes.Count));
 
-            Packet packet = new();
-            packet.field_Private_List_1_Byte_0 = new();
+            Packet packet = new()
+            {
+                field_Private_List_1_Byte_0 = new()
+            };
             foreach (byte b in bytes)
                 packet.field_Private_List_1_Byte_0.Add(b);
 
@@ -632,7 +626,7 @@ namespace GibsonCrabGameGlobalOffensive
         //Cette fonction envoie un message dans le chat de la part du server, marche uniquement en tant que Host de la partie
         public static void SendServerMessage(string message)
         {
-            Utility.processNewMessage(messagesList, $"#srv#|{message}");
+            Utility.ProcessNewMessage(messagesList, $"#srv#|{message}");
             ServerSend.SendChatMessage(1, $"|{message}");
         }
 
@@ -640,10 +634,8 @@ namespace GibsonCrabGameGlobalOffensive
         public static void Log(string path, string line)
         {
             // Utiliser StreamWriter pour ouvrir le fichier et écrire à la fin
-            using (StreamWriter writer = new StreamWriter(path, true))
-            {
-                writer.WriteLine(line.Trim()); // Écrire la nouvelle ligne sans les espaces à la fin
-            }
+            using StreamWriter writer = new(path, true);
+            writer.WriteLine(line.Trim()); // Écrire la nouvelle ligne sans les espaces à la fin
         }
 
         //Cette fonction vérifie si une fonction crash sans interrompre le fonctionnement d'une class/fonction, et retourne un booleen
@@ -680,10 +672,8 @@ namespace GibsonCrabGameGlobalOffensive
             {
                 if (!File.Exists(path))
                 {
-                    using (StreamWriter sw = File.CreateText(path))
-                    {
-                        sw.WriteLine("");
-                    }
+                    using StreamWriter sw = File.CreateText(path);
+                    sw.WriteLine("");
                 }
             }
             catch { }
@@ -697,9 +687,7 @@ namespace GibsonCrabGameGlobalOffensive
                 // Vérifier si le fichier existe
                 if (File.Exists(path))
                 {
-                    using (StreamWriter sw = new StreamWriter(path, false))
-                    {
-                    }
+                    using StreamWriter sw = new(path, false);
                 }
             }
             catch { }
@@ -707,11 +695,9 @@ namespace GibsonCrabGameGlobalOffensive
 
         public static void ReadConfigFile()
         {
-            string[] lines = System.IO.File.ReadAllLines(configFilePath);
+            string[] lines = File.ReadAllLines(configFilePath);
             Dictionary<string, string> config = [];
-            CultureInfo cultureInfo = new CultureInfo("fr-FR");
-            bool resultBool;
-            int resultInt;
+            CultureInfo cultureInfo = new("fr-FR");
             bool parseSuccess;
 
             foreach (string line in lines)
@@ -726,13 +712,13 @@ namespace GibsonCrabGameGlobalOffensive
             }
             menuKey = config["menuKey"];
 
-            parseSuccess = int.TryParse(config["messageTimer"], out resultInt);
+            parseSuccess = int.TryParse(config["messageTimer"], out int resultInt);
             messageTimer = parseSuccess ? resultInt : 30;
 
             parseSuccess = int.TryParse(config["playerToAutoStart"], out resultInt);
             playerToAutoStart = parseSuccess ? resultInt : 2;
 
-            parseSuccess = bool.TryParse(config["displayRankInChat"], out resultBool);
+            parseSuccess = bool.TryParse(config["displayRankInChat"], out bool resultBool);
             displayRankInChat = parseSuccess ? resultBool : false;
 
             parseSuccess = bool.TryParse(config["wordsFilter"], out resultBool);
@@ -748,7 +734,7 @@ namespace GibsonCrabGameGlobalOffensive
 
         public static void SetConfigFile(string configFilePath)
         {
-            Dictionary<string, string> configDefaults = new Dictionary<string, string>
+            Dictionary<string, string> configDefaults = new()
             {
                 {"version", "v0.1.1"},
                 {"menuKey", "f5"},
@@ -758,7 +744,7 @@ namespace GibsonCrabGameGlobalOffensive
                 {"wordsFilter", "true"},
             };
 
-            Dictionary<string, string> currentConfig = new Dictionary<string, string>();
+            Dictionary<string, string> currentConfig = [];
 
             // If the file exists, read current config
             if (File.Exists(configFilePath))
@@ -785,12 +771,10 @@ namespace GibsonCrabGameGlobalOffensive
             }
 
             // Save merged config
-            using (StreamWriter sw = File.CreateText(configFilePath))
+            using StreamWriter sw = File.CreateText(configFilePath);
+            foreach (KeyValuePair<string, string> pair in currentConfig)
             {
-                foreach (KeyValuePair<string, string> pair in currentConfig)
-                {
-                    sw.WriteLine(pair.Key + "=" + pair.Value);
-                }
+                sw.WriteLine(pair.Key + "=" + pair.Value);
             }
 
         }
@@ -799,7 +783,7 @@ namespace GibsonCrabGameGlobalOffensive
     //Cette class regroupe un ensemble de fonction relative aux données de la partie
     public class GameData
     {
-        public static string commandPlayerFinder(string identifier)
+        public static string CommandPlayerFinder(string identifier)
         {
             if (identifier.Contains("#"))
             {
@@ -987,7 +971,7 @@ namespace GibsonCrabGameGlobalOffensive
         }
         public static class MeleeWeaponUsageTracker
         {
-            private static readonly Dictionary<string, DateTime> lastMeleeWeaponUsage = new Dictionary<string, DateTime>();
+            private static readonly Dictionary<string, DateTime> lastMeleeWeaponUsage = [];
 
             public static string GetMessageForMeleeWeaponUse(string username, int playerNumber, string itemName, ulong steamId)
             {
@@ -997,35 +981,18 @@ namespace GibsonCrabGameGlobalOffensive
                 {
                     TimeSpan timeDifference = currentTime - lastUseTime;
                     lastMeleeWeaponUsage[username] = currentTime;
-                    int normalSpeed = 0;
-
                     if (itemName != "null")
                         lastItemName = itemName;
-
-                    switch (lastItemName)
+                    var normalSpeed = lastItemName switch
                     {
-                        case "Bat(Clone)":
-                            normalSpeed = 25;
-                            break;
-                        case "Katana(Clone)":
-                            normalSpeed = 700;
-                            break;
-                        case "Knife(Clone)":
-                            normalSpeed = 700;
-                            break;
-                        case "MetalPipe(Clone)":
-                            normalSpeed = 25;
-                            break;
-                        case "Stick(Clone)":
-                            normalSpeed = 25;
-                            break;
-                        case "Bomb(Clone)":
-                            normalSpeed = 25;
-                            break;
-                        default:
-                            normalSpeed = 0;
-                            break;
-                    }
+                        "Bat(Clone)" => 25,
+                        "Katana(Clone)" => 700,
+                        "Knife(Clone)" => 700,
+                        "MetalPipe(Clone)" => 25,
+                        "Stick(Clone)" => 25,
+                        "Bomb(Clone)" => 25,
+                        _ => 0,
+                    };
                     if (timeDifference.TotalMilliseconds <= normalSpeed)
                     {
                         if (valorantPlayer != null)
@@ -1055,7 +1022,7 @@ namespace GibsonCrabGameGlobalOffensive
         }
         public static class GunUsageTracker
         {
-            private static readonly Dictionary<string, DateTime> lastGunUsage = new Dictionary<string, DateTime>();
+            private static readonly Dictionary<string, DateTime> lastGunUsage = [];
 
             public static string GetMessageForGunUse(string username, int playerNumber, ulong steamId)
             {
@@ -1095,157 +1062,6 @@ namespace GibsonCrabGameGlobalOffensive
         }
     }
 
-    public class MenuFunctions
-    {
-        public static void CheckMenuFileExists()
-        {
-            string menuContent = "\t\r\n\tPosition : [POSITION]  |  Speed : [SPEED]  |  Rotation : [ROTATION]\t\t<b> \r\n\r\n\t______________________________________________________________________</b>\r\n\r\n\r\n\t<b><color=orange>[OTHERPLAYER]</color></b>  |  Position: [OTHERPOSITION]  |  Speed : [OTHERSPEED] | Selecteur :  [SELECTEDINDEX] | <b>Status : [STATUS]</b> \r\n\r\n\t\t\t\r\n\t\r\n\r\n\t______________________________________________________________________\r\n\r\n\t\t\r\n     <b>[MENUBUTTON0]\r\n\r\n\t[MENUBUTTON1]\r\n\r\n\t[MENUBUTTON2]\r\n\r\n\t[MENUBUTTON3]\r\n\r\n\t[MENUBUTTON4]\r\n\r\n\t_______________________________ANTICHEAT_______________________________\r\n\r\n\t[MENUBUTTON5]\r\n\r\n\t[MENUBUTTON6]\r\n\r\n\t[MENUBUTTON7]</b>";
-
-            if (System.IO.File.Exists(menuFilePath))
-            {
-                string currentContent = System.IO.File.ReadAllText(menuFilePath, System.Text.Encoding.UTF8);
-
-
-                if (currentContent != menuContent)
-                {
-                    System.IO.File.WriteAllText(menuFilePath, menuContent, System.Text.Encoding.UTF8);
-                }
-            }
-            else
-            {
-                // Si le fichier n'existe pas, créez-le avec le contenu fourni
-                System.IO.File.WriteAllText(menuFilePath, menuContent, System.Text.Encoding.UTF8);
-            }
-        }
-        public static void RegisterDataCallbacks(System.Collections.Generic.Dictionary<string, System.Func<string>> dict)
-        {
-            foreach (System.Collections.Generic.KeyValuePair<string, System.Func<string>> pair in dict)
-            {
-                DebugDataCallbacks.Add(pair.Key, pair.Value);
-            }
-        }
-        public static void LoadMenuLayout()
-        {
-            layout = System.IO.File.ReadAllText(menuFilePath, System.Text.Encoding.UTF8);
-        }
-        public static void RegisterDefaultCallbacks()
-        {
-            RegisterDataCallbacks(new System.Collections.Generic.Dictionary<string, System.Func<string>>(){
-                {"POSITION", ClientData.GetClientPositionString},
-                {"SPEED", ClientData.GetClientSpeedString},
-                {"ROTATION", ClientData.GetClientRotationString},
-                {"SELECTEDINDEX", () => playerIndex.ToString()},
-                {"OTHERPLAYER", MultiPlayersData.GetOtherPlayerUsername},
-                {"OTHERPOSITION", MultiPlayersData.GetOtherPlayerPositionAsString},
-                {"OTHERSPEED", MultiPlayersData.GetOtherPlayerSpeed},
-                {"STATUS", MultiPlayersData.GetStatus},
-                {"MENUBUTTON0",() => displayButton0},
-                {"MENUBUTTON1",() => displayButton1},
-                {"MENUBUTTON2",() => displayButton2},
-                {"MENUBUTTON3",() => displayButton3},
-                {"MENUBUTTON4",() => displayButton4},
-                {"MENUBUTTON5",() => displayButton5},
-                {"MENUBUTTON6",() => displayButton6},
-                {"MENUBUTTON7",() => displayButton7},
-            });
-        }
-
-        public static string DisplayButtonState(int index)
-        {
-            if (buttonStates[index])
-                return "<b><color=red>ON</color></b>";
-            else
-                return "<b><color=blue>OFF</color></b>";
-        }
-        public static string FormatLayout()
-        {
-            string formatted = layout;
-            foreach (System.Collections.Generic.KeyValuePair<string, System.Func<string>> pair in DebugDataCallbacks)
-            {
-                formatted = formatted.Replace("[" + pair.Key + "]", pair.Value());
-            }
-            return formatted;
-        }
-        public static string HandleMenuDisplay(int buttonIndex, Func<string> getButtonLabel, Func<string> getButtonSpecificData)
-        {
-            string buttonLabel = getButtonLabel();
-
-            if (menuSelector != buttonIndex)
-            {
-                return $" {buttonLabel} <b>{getButtonSpecificData()}</b>";
-            }
-
-            if (!buttonStates[buttonIndex])
-            {
-                return $"■<color=yellow>{buttonLabel}</color>■  <b>{getButtonSpecificData()}</b>";
-            }
-            else
-            {
-                return $"<color=red>■</color><color=yellow>{buttonLabel}</color><color=red>■</color>  <b>{getButtonSpecificData()}</b>";
-            }
-        }
-        public static string GetSelectedFlungDetectorParam()
-        {
-            if (menuSelector == 5)
-            {
-                switch (subMenuSelector)
-                {
-                    case 0:
-                        if (onSubButton)
-                            return "  |  " + $"<color=red>■</color><color=orange>Check Frequency : {checkFrequency.ToString("F2")}</color><color=red>■</color>" + $"  |  Alert Level" + $"  |  Flung Detector Status";
-                        else
-                            return "  |  " + $"■<color=orange>Check Frequency : {checkFrequency.ToString("F2")}</color>■" + $"  |  Alert Level" + $"  |  Flung Detector Status";
-                    case 1:
-                        if (onSubButton)
-                            return "  |  " + $"Check Frequency" + $"  |  <color=red>■</color><color=orange>Alert Level : {alertLevel.ToString()}</color><color=red>■</color>" + $"  |  Flung Detector Status";
-                        else
-                            return "  |  " + $"Check Frequency" + $"  |  ■<color=orange>Alert Level : {alertLevel.ToString()}</color>■" + $"  |  Flung Detector Status";
-                    case 2:
-                        return "  |  " + $"Check Frequency" + $"  |  Alert Level" + $"  |  ■<color=orange>Flung Dector Status : {buttonStates[5].ToString()}</color>■";
-                    default:
-                        return "";
-                }
-            }
-            else
-                return "";
-        }
-        public static void ExecuteSubMenuAction()
-        {
-            if (!onButton)
-            {
-                var selectors = (menuSelector, subMenuSelector);
-
-                switch (selectors)
-                {
-                    case (40, -1):
-                        break;
-                }
-            }
-            if (onButton)
-            {
-                var selectors = (menuSelector, subMenuSelector);
-
-                switch (selectors)
-                {
-                    case (5, 0):
-                        onSubButton = !onSubButton;
-                        break;
-                    case (5, 1):
-                        onSubButton = !onSubButton;
-                        break;
-                    case (5, 2):
-                        buttonStates[5] = !buttonStates[5];
-
-                        if (buttonStates[5])
-                            Utility.ForceMessage("■<color=yellow>(FD))Flung Detector ON</color>■");
-                        else
-                            Utility.ForceMessage("■<color=yellow>(FD)Flung Detector OFF</color>■");
-                        break;
-                }
-            }
-        }
-    }
-
     public static class MultiPlayersData
     {
         public static Rigidbody GetOtherPlayerBody()
@@ -1257,14 +1073,9 @@ namespace GibsonCrabGameGlobalOffensive
                 GameData.GetGameManager().activePlayers.entries.ToList()[playerIndex].value.GetComponent<Rigidbody>();
             });
 
-            if (result)
-            {
-                rb = null;
-            }
-            else
-            {
-                rb = GameData.GetGameManager().activePlayers.entries.ToList()[playerIndex].value.GetComponent<Rigidbody>();
-            }
+            if (result) rb = null;
+            else rb = GameData.GetGameManager().activePlayers.entries.ToList()[playerIndex].value.GetComponent<Rigidbody>();
+            
 
             return rb;
         }

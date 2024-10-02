@@ -4,12 +4,12 @@
     {
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.SendChatMessage))]
         [HarmonyPrefix]
-        public static bool ServerSendSendChatMessagePre(ulong param_0, string param_1)
+        public static bool ServerSendSendChatMessagePre(ulong __0, string __1)
         {
-            if (!SteamManager.Instance.IsLobbyOwner() || param_0 < 101) return true; // ID < 101 -> ChatSystem Message (ignore)
+            if (!SteamManager.Instance.IsLobbyOwner() || __0 < 101) return true; // ID < 101 -> ChatSystem Message (ignore)
 
-            string msg = param_1.ToLower();
-            if (param_0 == clientId && IsCommand(msg))
+            string msg = __1.ToLower();
+            if (__0 == clientId && IsCommand(msg))
             {
                 string[] parts = msg.Split(' '); // Split the command and its arguments
 
@@ -26,7 +26,7 @@
                         HandleStartCommand();
                         return false;
                     case "!rename":
-                        HandleRenameCommand(param_1);
+                        HandleRenameCommand(__1);
                         return false;
                     case "!reset":
                         HandleResetCommand();
@@ -75,18 +75,18 @@
 
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.SendChatMessage))]
         [HarmonyPostfix]
-        public static void ServerSendSendChatMessagePost(ulong param_0, string param_1)
+        public static void ServerSendSendChatMessagePost(ulong __0, string __1)
         {
-            if (!SteamManager.Instance.IsLobbyOwner() || param_0 < 101 || param_1.StartsWith("|")) return; // ID < 101 -> ChatSystem Message, | -> Server Message (ignore)
+            if (!SteamManager.Instance.IsLobbyOwner() || __0 < 101 || __1.StartsWith("|")) return; // ID < 101 -> ChatSystem Message, | -> Server Message (ignore)
 
-            string msg = param_1.ToLower();
+            string msg = __1.ToLower();
 
             if (IsCommand(msg))
             {
                 string[] parts = msg.Split(' '); // Split the command and its arguments
-                var player = CGGOPlayer.GetCGGOPlayer(param_0);
+                var player = CGGOPlayer.GetCGGOPlayer(__0);
 
-                if (permsPlayers.Contains(param_0))
+                if (permsPlayers.Contains(__0))
                 {
                     // Modo commands
                     switch (parts[0])
@@ -132,75 +132,75 @@
                 switch (parts[0])
                 {
                     case "!help" or "/help" or "!h" or "/h":
-                        HandlePlayerHelpCommand(param_0);
+                        HandlePlayerHelpCommand(__0);
                         break;
                     case "!discord" or "/discord" or "!d" or "/d" or "!disc" or "/disc" or "!cord" or "/cord":
-                        HandleDiscordCommand(param_0);
+                        HandleDiscordCommand(__0);
                         break;
                     case "!dev" or "/dev":
-                        HandleDevCommand(param_0);
+                        HandleDevCommand(__0);
                         break;
                     case "!report" or "/report":
-                        HandleReportCommand(parts, param_0, param_1);
+                        HandleReportCommand(parts, __0, __1);
                         break;
                     case "!kd" or "/kd":
-                        HandleKDCommand(parts, param_0);
+                        HandleKDCommand(parts, __0);
                         break;
                     case "!win" or "/win":
-                        HandleWinCommand(parts, param_0);
+                        HandleWinCommand(parts, __0);
                         break;
                     case "!level" or "/level":
-                        HandleLevelCommand(parts, param_0);
+                        HandleLevelCommand(parts, __0);
                         break;
                     case "!leaderboard" or "/leaderboard":
-                        HandleLeaderboardCommand(parts, param_0);
+                        HandleLeaderboardCommand(parts, __0);
                         break;
                     case "!elo" or "/elo":
-                        HandleEloCommand(parts, param_0);
+                        HandleEloCommand(parts, __0);
                         break;
                     case "!stats" or "/stats":
-                        HandleStatsCommand(parts, param_0);
+                        HandleStatsCommand(parts, __0);
                         break;
                     case "/vandal" or "!vandal" or "!v" or "/v":
-                        HandleWeaponPurchase(param_0, player, 2900, 0, publicVandalList);
+                        HandleWeaponPurchase(__0, player, WeaponsConstants.RIFLE_PRICE, WeaponsId.RIFLE_ID, publicRifleList);
                         break;
                     case "/classic" or "!classic" or "!c" or "/c":
-                        HandleWeaponPurchase(param_0, player, 900, 1, publicClassicList);
-                        break;
-                    case "/shorty" or "!shorty" or "!s" or "/s":
-                        HandleWeaponPurchase(param_0, player, 1850, 3, publicShortyList);
-                        break;
-                    case "/katana" or "!katana" or "!k" or "/k":
-                        HandleWeaponPurchase(param_0, player, 3200, 6, publicKatanaList);
+                        HandleWeaponPurchase(__0, player, WeaponsConstants.PISTOL_PRICE, WeaponsId.PISTOL_ID, publicPistolList);
                         break;
                     case "/revolver" or "!revolver" or "!r" or "/r":
-                        HandleWeaponPurchase(param_0, player, 4700, 2, publicRevolverList);
+                        HandleWeaponPurchase(__0, player, WeaponsConstants.REVOLVER_PRICE, WeaponsId.REVOLVER_ID, publicRevolverList);
+                        break;
+                    case "/shorty" or "!shorty" or "!s" or "/s":
+                        HandleWeaponPurchase(__0, player, WeaponsConstants.SHOTGUN_PRICE, WeaponsId.SHOTGUN_ID, publicShotgunList);
+                        break;
+                    case "/katana" or "!katana" or "!k" or "/k":
+                        HandleWeaponPurchase(__0, player, WeaponsConstants.KATANA_PRICE, WeaponsId.KATANA_ID, publicKatanaList);
                         break;
                     case "/shield25" or "!shield25" or "!25" or "/25":
-                        HandleShieldPurchase(player, 400, 25);
+                        HandleShieldPurchase(player, ShieldConstants.SMALL_SHIELD_PRICE, ShieldConstants.SMALL_SHIELD_VALUE);
                         break;
                     case "/shield50" or "!shield50" or "!50" or "/50":
-                        HandleShieldPurchase(player, 1000, 50);
+                        HandleShieldPurchase(player, ShieldConstants.BIG_SHIELD_PRICE, ShieldConstants.BIG_SHIELD_VALUE);
                         break;
                     case "!fr" or "/fr":
-                        HandleGenericLanguageCommand(param_0,CommandMessages.MESSAGE_FR,CommandMessages.LANGUAGE_FR);
+                        HandleGenericLanguageCommand(__0,CommandMessages.MESSAGE_FR,CommandMessages.LANGUAGE_FR);
                         break;
                     case "!en" or "/en":
-                        HandleGenericLanguageCommand(param_0, CommandMessages.MESSAGE_EN, CommandMessages.LANGUAGE_EN);
+                        HandleGenericLanguageCommand(__0, CommandMessages.MESSAGE_EN, CommandMessages.LANGUAGE_EN);
                         break;
                     case "!de" or "/de":
-                        HandleGenericLanguageCommand(param_0, CommandMessages.MESSAGE_DE, CommandMessages.LANGUAGE_DE);
+                        HandleGenericLanguageCommand(__0, CommandMessages.MESSAGE_DE, CommandMessages.LANGUAGE_DE);
                         break;
                     case "!es" or "/es":
-                        HandleGenericLanguageCommand(param_0, CommandMessages.MESSAGE_ES, CommandMessages.LANGUAGE_ES);
+                        HandleGenericLanguageCommand(__0, CommandMessages.MESSAGE_ES, CommandMessages.LANGUAGE_ES);
                         break;
                     case "!ru" or "/ru":
-                        HandleGenericLanguageCommand(param_0, CommandMessages.MESSAGE_RU, CommandMessages.LANGUAGE_RU);
+                        HandleGenericLanguageCommand(__0, CommandMessages.MESSAGE_RU, CommandMessages.LANGUAGE_RU);
                         break;
                 }
             }
         }
-        static void HandleReportCommand(string[] arguments, ulong userId, string param_1)
+        static void HandleReportCommand(string[] arguments, ulong userId, string __1)
         {
             if (arguments.Length < 2)
             {
@@ -208,7 +208,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length >= 2) ? GameData.commandPlayerFinder(arguments[1]) : null;
+            string steamId = (arguments.Length >= 2) ? GameData.CommandPlayerFinder(arguments[1]) : null;
 
             if (steamId == null)
             {
@@ -221,7 +221,7 @@
 
             if (reported != null && reporter != null)
             {
-                Utility.Log(playersReportFilePath, $"[{userId}] {reporter.username} reported [{steamId}] {reported.username} | message: {param_1}");
+                Utility.Log(playersReportFilePath, $"[{userId}] {reporter.username} reported [{steamId}] {reported.username} | message: {__1}");
                 Utility.SendPrivateMessageWithWaterMark(userId, "Report sent");
             }
             else Utility.SendPrivateMessageWithWaterMark(userId, CommandMessages.PLAYER_NOT_FOUND);  
@@ -235,7 +235,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 2) ? GameData.commandPlayerFinder(arguments[1]) : userId.ToString();
+            string steamId = (arguments.Length == 2) ? GameData.CommandPlayerFinder(arguments[1]) : userId.ToString();
 
             if (steamId == null)
             {
@@ -270,7 +270,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 2) ? GameData.commandPlayerFinder(arguments[1]) : userId.ToString();
+            string steamId = (arguments.Length == 2) ? GameData.CommandPlayerFinder(arguments[1]) : userId.ToString();
 
             if (steamId == null)
             {
@@ -296,7 +296,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 2) ? GameData.commandPlayerFinder(arguments[1]) : userId.ToString();
+            string steamId = (arguments.Length == 2) ? GameData.CommandPlayerFinder(arguments[1]) : userId.ToString();
 
             if (steamId == null)
             {
@@ -320,7 +320,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 2) ? GameData.commandPlayerFinder(arguments[1]) : userId.ToString();
+            string steamId = (arguments.Length == 2) ? GameData.CommandPlayerFinder(arguments[1]) : userId.ToString();
 
             if (steamId == null)
             {
@@ -344,7 +344,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 2) ? GameData.commandPlayerFinder(arguments[1]) : userId.ToString();
+            string steamId = (arguments.Length == 2) ? GameData.CommandPlayerFinder(arguments[1]) : userId.ToString();
 
             if (steamId == null)
             {
@@ -374,7 +374,7 @@
 
             if (arguments.Length >= 2)
             {
-                steamId = GameData.commandPlayerFinder(arguments[1]);
+                steamId = GameData.CommandPlayerFinder(arguments[1]);
             }
             else
             {
@@ -469,7 +469,7 @@
                 return;
             }
 
-            string steamId = (arguments[1] == "*") ? null : GameData.commandPlayerFinder(arguments[1]);
+            string steamId = (arguments[1] == "*") ? null : GameData.CommandPlayerFinder(arguments[1]);
 
             if (arguments[1] == "*")
             {
@@ -506,7 +506,7 @@
                 return;
             }
 
-            string steamId = (identifier == "*") ? null : GameData.commandPlayerFinder(identifier);
+            string steamId = (identifier == "*") ? null : GameData.CommandPlayerFinder(identifier);
 
             if (steamId == null && identifier != "*")
             {
@@ -542,7 +542,7 @@
                 return;
             }
 
-            string steamId = GameData.commandPlayerFinder(arguments[1]);
+            string steamId = GameData.CommandPlayerFinder(arguments[1]);
             if (steamId == null)
             {
                 Utility.SendServerMessage(CommandMessages.PLAYER_NOT_FOUND);
@@ -591,7 +591,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 2) ? GameData.commandPlayerFinder(arguments[1]) : null;
+            string steamId = (arguments.Length == 2) ? GameData.CommandPlayerFinder(arguments[1]) : null;
 
             if (steamId == null)
             {
@@ -617,7 +617,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 2) ? GameData.commandPlayerFinder(arguments[1]) : null;
+            string steamId = (arguments.Length == 2) ? GameData.CommandPlayerFinder(arguments[1]) : null;
 
             if (steamId == null)
             {
@@ -642,7 +642,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 4) ? GameData.commandPlayerFinder(arguments[1]) : null;
+            string steamId = (arguments.Length == 4) ? GameData.CommandPlayerFinder(arguments[1]) : null;
 
             if (steamId == null)
             {
@@ -692,7 +692,7 @@
         {
             foreach (var identifier in playerIdentifiers)
             {
-                string steamId = GameData.commandPlayerFinder(identifier);
+                string steamId = GameData.CommandPlayerFinder(identifier);
                 if (steamId == null) continue;
 
                 PlayerManager player = GameData.GetPlayer(steamId);
@@ -708,7 +708,7 @@
                 return;
             }
 
-            string steamId = (arguments.Length == 3) ? GameData.commandPlayerFinder(arguments[1]) : null;
+            string steamId = (arguments.Length == 3) ? GameData.CommandPlayerFinder(arguments[1]) : null;
 
             if (steamId == null)
             {
@@ -749,35 +749,6 @@
             }
 
             ServerSend.LoadMap(firstNumber, secondNumber);
-        }
-
-        static void HandleWeaponPurchase(ulong userId, CGGOPlayer player, int cost, int weaponId, List<int> weaponList)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive || !publicBuyPhase || player.Balance < cost) return;
-
-            player.MoneyUsed += cost;
-            player.Balance -= cost;
-            Variables.weaponId++;
-            weaponList.Add(weaponId);
-
-            if (weaponId == 6) player.KatanaId = weaponId;
-
-            try
-            {
-                GameServer.ForceGiveWeapon(userId, weaponId, weaponId);
-            }
-            catch (Exception ex)
-            {
-                Utility.Log(logFilePath, $"Error giving weapon {weaponId} to player {userId}: {ex}");
-            }
-        }
-
-        static void HandleShieldPurchase(CGGOPlayer player, int cost, int shieldValue)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive || !publicBuyPhase || player.Shield >= shieldValue || player.Balance < cost) return;
-
-            player.Balance -= cost;
-            player.Shield = shieldValue;
         }
 
         static bool IsCommand(string msg) => msg.StartsWith("!") || msg.StartsWith("/");

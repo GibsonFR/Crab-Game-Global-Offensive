@@ -1,16 +1,21 @@
 ﻿namespace GibsonCrabGameGlobalOffensive
 {
+    public enum TeamsId
+    {
+        Attackers = 0,
+        Defenders = 1,
+    }
     public class CGGOManager : MonoBehaviour
     {
         string cheaterUsername = "", currentPhase = "init";
 
         string[] tutorialCurrentMessages = [];
 
-        int respawnIndexTuto = 0, winnerTeamId, cinematicDummy = 0, CheaterDetectedMessageState = 0, BombDummy, bombId, buyPhaseMessageState = 0, plantingPhaseMessageState = 0, defusePhaseMessageState = 0, totalTeamScore = 0, tutorialCurrentMessageIndex = 0, siteId = -1;
+        int respawnIndexTuto = 0, winnerTeamId, cinematicDummy = 0, CheaterDetectedMessageState = 0, BombDummy, buyPhaseMessageState = 0, plantingPhaseMessageState = 0, defusePhaseMessageState = 0, totalTeamScore = 0, tutorialCurrentMessageIndex = 0, siteId = -1;
 
-        public static int publicBombId, publicGrenadeId;
+        public static int publicBombId;
 
-        ulong bombSpawnedId = 0, cheaterSteamId = 0;
+        ulong bombSpawnerId = 0, cheaterSteamId = 0;
 
         float elapsedGameEnded, elaspedRespawnTuto, elapsedTuto, elapsedTutoMessage, elapsedCheaterMessage, elapsedShield, elapsedRemoveBombDummy, elapsedMilkZone, elapsedInit, elapsedRoundEnded, elapsedBuyPhase, elapsedPlantingPhase, elapsedDefusingTimer, elapsedBuyMessage, elapsedDefusingPhase, elapsedPlantingMessage, elapsedDefusingMessage;
 
@@ -20,7 +25,7 @@
 
         PlayerManager BombHandler = null;
 
-        public static List<int> publicClassicList = [], publicShortyList = [], publicVandalList = [], publicKatanaList = [], publicRevolverList = [];
+        public static List<int> publicPistolList = [], publicShotgunList = [], publicRifleList = [], publicKatanaList = [], publicRevolverList = [];
 
         public static List<CGGOPlayer> publicAttackersList = [], publicDefendersList = [];
 
@@ -227,8 +232,8 @@
             var (rankedDefenders, rankedDefendersScores) = CombatScore.RankPlayers(publicDefendersList, true);
             var (rankedAll, rankedAllScores) = CombatScore.RankPlayers(cggoPlayersList, true);
 
-            List<CGGOPlayer> rankedPlayers = new List<CGGOPlayer>();
-            List<double> rankedPlayersScores = new List<double>();
+            List<CGGOPlayer> rankedPlayers = [];
+            List<double> rankedPlayersScores = [];
 
             if (winnerTeamId == 0)
             {
@@ -518,9 +523,9 @@
 
         public static void HandleWeaponDrops(CGGOPlayer player)
         {
-            DropItemIfWeapon(player.Classic, player.SteamId, 1, 12, publicClassicList);
-            DropItemIfWeapon(player.Vandal, player.SteamId, 0, 30, publicVandalList);
-            DropItemIfWeapon(player.Shorty, player.SteamId, 3, 2, publicShortyList);
+            DropItemIfWeapon(player.Pistol, player.SteamId, 1, 12, publicPistolList);
+            DropItemIfWeapon(player.Rifle, player.SteamId, 0, 30, publicRifleList);
+            DropItemIfWeapon(player.Shotgun, player.SteamId, 3, 2, publicShotgunList);
             DropItemIfWeapon(player.Katana, player.SteamId, 6, 1, publicKatanaList);
             DropItemIfWeapon(player.Revolver, player.SteamId, 2, 6, publicRevolverList);
         }
@@ -827,8 +832,8 @@
 
         void LoadRandomMap()
         {
-            System.Random random = new System.Random();
-            List<int> numbers = new List<int> { 0, 2, 7, 20 };
+            System.Random random = new();
+            List<int> numbers = [0, 2, 7, 20];
             int randomIndex = random.Next(0, numbers.Count);
             int randomElement = numbers[randomIndex];
 
@@ -931,15 +936,15 @@
             {
                 Utility.Log(logFilePath, $"Cheater Kicked: {player.Username}, {player.SteamId}");
                 GameServer.ForceRemoveItemItemId(player.SteamId, 7);
-                if (player.Vandal) GameServer.ForceRemoveItemItemId(player.SteamId, 0);
-                if (player.Classic) GameServer.ForceRemoveItemItemId(player.SteamId, 1);
+                if (player.Rifle) GameServer.ForceRemoveItemItemId(player.SteamId, 0);
+                if (player.Pistol) GameServer.ForceRemoveItemItemId(player.SteamId, 1);
                 if (player.Revolver) GameServer.ForceRemoveItemItemId(player.SteamId, 2);
-                if (player.Shorty) GameServer.ForceRemoveItemItemId(player.SteamId, 3);
+                if (player.Shotgun) GameServer.ForceRemoveItemItemId(player.SteamId, 3);
                 if (player.Katana) GameServer.ForceRemoveItemItemId(player.SteamId, 6);
-                player.Vandal = false;
-                player.Classic = false;
+                player.Rifle = false;
+                player.Pistol = false;
                 player.Revolver = false;
-                player.Shorty = false;
+                player.Shotgun = false;
                 player.Katana = false;
                 player.Balance = 0;
 
@@ -1018,7 +1023,7 @@
             if (elapsedBuyPhase < 1f || killBombSpawner) return;
 
             killBombSpawner = true;
-            KillPlayer(bombSpawnedId);
+            KillPlayer(bombSpawnerId);
         }
 
         void GiveLastRoundWeapons()
@@ -1028,23 +1033,23 @@
 
             foreach (var player in cggoPlayersList)
             {
-                if (player.Classic)
+                if (player.Pistol)
                 {
                     weaponId++;
                     GameServer.ForceGiveWeapon(player.SteamId, 1, weaponId);
-                    if (!publicClassicList.Contains(weaponId)) publicClassicList.Add(weaponId);
+                    if (!publicPistolList.Contains(weaponId)) publicPistolList.Add(weaponId);
                 }
-                if (player.Shorty)
+                if (player.Shotgun)
                 {
                     weaponId++;
                     GameServer.ForceGiveWeapon(player.SteamId, 3, weaponId);
-                    if (!publicShortyList.Contains(weaponId)) publicShortyList.Add(weaponId);
+                    if (!publicShotgunList.Contains(weaponId)) publicShotgunList.Add(weaponId);
                 }
-                if (player.Vandal)
+                if (player.Rifle)
                 {
                     weaponId++;
                     GameServer.ForceGiveWeapon(player.SteamId, 0, weaponId);
-                    if (!publicVandalList.Contains(weaponId)) publicVandalList.Add(weaponId);
+                    if (!publicRifleList.Contains(weaponId)) publicRifleList.Add(weaponId);
                 }
                 if (player.Revolver)
                 {
@@ -1169,9 +1174,9 @@
 
                 player.Balance = 0;
                 player.Katana = false;
-                player.Classic = false;
-                player.Shorty = false;
-                player.Vandal = false;
+                player.Pistol = false;
+                player.Shotgun = false;
+                player.Rifle = false;
                 player.Revolver = false;
                 player.Shield = 0;
             }
@@ -1179,9 +1184,9 @@
 
         void ResetItemsOnMap()
         {
-            publicClassicList = [];
-            publicShortyList = [];
-            publicVandalList = [];
+            publicPistolList = [];
+            publicShotgunList = [];
+            publicRifleList = [];
             publicKatanaList = [];
             publicRevolverList = [];
         }
@@ -1189,9 +1194,9 @@
         {
             publicAllAttackersDead = false;
             publicAllDefendersDead = false;
-            publicClassicList = [];
-            publicShortyList = [];
-            publicVandalList = [];
+            publicPistolList = [];
+            publicShotgunList = [];
+            publicRifleList = [];
             publicKatanaList = [];
             publicRevolverList = [];
             publicAttackersList = [];
@@ -1211,9 +1216,9 @@
             isTutoDone = false;
             publicAllAttackersDead = false;
             publicAllDefendersDead = false;
-            publicClassicList = [];
-            publicShortyList = [];
-            publicVandalList = [];
+            publicPistolList = [];
+            publicShotgunList = [];
+            publicRifleList = [];
             publicKatanaList = [];
             publicRevolverList = [];
             publicAttackersList = [];
@@ -1232,9 +1237,9 @@
             averageCGGOElo = 0;
             publicAllAttackersDead = false;
             publicAllDefendersDead = false;
-            publicClassicList = [];
-            publicShortyList = [];
-            publicVandalList = [];
+            publicPistolList = [];
+            publicShotgunList = [];
+            publicRifleList = [];
             publicKatanaList = [];
             publicRevolverList = [];
             publicAttackersList = [];
@@ -1292,8 +1297,7 @@
             ServerSend.PlayerAnimation((ulong)dummyId, 0, true);
 
 
-            ItemsRemover.deleteDelay = 200;
-            itemToDelete.Add(publicGrenadeId, DateTime.Now);
+            itemToDelete.Add(publicBombId, DateTime.Now);
         }
 
         void SendAttackersWonMessage()
@@ -1317,7 +1321,7 @@
             while (topAttackersPlayers.Count < 6) topAttackersPlayers.Add(null);
             while (topDefendersPlayers.Count < 6) topDefendersPlayers.Add(null);
 
-            string AdjustName(string name, int maxLength)
+            static string AdjustName(string name, int maxLength)
             {
                 if (name.Length > maxLength)
                     return name.Substring(0, maxLength - 3) + "...";
@@ -1804,7 +1808,7 @@
 
         static void SendChatMessages(ulong steamId, int numberOfMessages)
         {
-            List<string> validMessages = new List<string>();
+            List<string> validMessages = [];
             int index = 0;
 
             while (validMessages.Count < numberOfMessages && index <= 8)
@@ -1832,7 +1836,7 @@
         void AssignTeams()
         {
             if (CGGOTeamSet) return;
-            List<PlayerManager> validPlayers = new();
+            List<PlayerManager> validPlayers = [];
 
             foreach (var player in playersList)
             {
@@ -1843,7 +1847,7 @@
             if (validPlayers.Count >= 4) isCGGORanked = true;
             else isCGGORanked = false;
 
-            List<(PlayerManager player, float elo)> playersWithElo = new();
+            List<(PlayerManager player, float elo)> playersWithElo = [];
             foreach (var player in validPlayers)
             {
                 string steamId = player.steamProfile.m_SteamID.ToString();
@@ -1853,8 +1857,8 @@
 
             playersWithElo.Sort((x, y) => y.elo.CompareTo(x.elo));
 
-            List<CGGOPlayer> teamAttackers = new();
-            List<CGGOPlayer> teamDefenders = new();
+            List<CGGOPlayer> teamAttackers = [];
+            List<CGGOPlayer> teamDefenders = [];
             float teamAttackersElo = 0;
             float teamDefendersElo = 0;
 
@@ -1966,15 +1970,17 @@
             try
             {
                 weaponId++;
-                bombSpawnedId = (ulong)weaponId;
-                CreateDummy(currentMap.BombSpawnPosition, weaponId);
+                bombSpawnerId = (ulong)weaponId;
+
+
+                CreateDummy(currentMap.BombSpawnPosition, (int)bombSpawnerId);
                 try
                 {
-                    ServerSend.DropItem(bombSpawnedId, 5, 500000000, 0);
+                    weaponId++;
+                    publicBombId = weaponId;
+                    ServerSend.DropItem(bombSpawnerId, 5, publicBombId, 0);
                 }
                 catch { }
-                bombId = 500000000;
-                publicBombId = bombId;
             }
             catch { }
         }
@@ -2169,7 +2175,7 @@
             public bool HasFinishedCurrentMessage { get; set; } = false;
         }
 
-        Dictionary<ulong, PlayerTutorialState> playerTutorialStates = new Dictionary<ulong, PlayerTutorialState>();
+        Dictionary<ulong, PlayerTutorialState> playerTutorialStates = [];
         int globalTutorialCurrentMessageIndex = 0; // Synchronisé pour tous les joueurs
 
         void CGGOTutoMessage()
@@ -2278,16 +2284,16 @@
         void CreateDummy(Vector3 position, int dummyId)
         {
             // Utilisation de votre fonction createDummy pour créer un dummy à la position spécifiée
-            Packet packet = new Packet(17); //17 est gameSpawnPlayer
+            Packet packet = new(17); //17 est gameSpawnPlayer
 
-            // Utilisation du dummyId passé en paramètre
+            // Utilisation du dummyId passé en _ètre
             packet.Method_Public_Void_UInt64_0((ulong)dummyId);
             packet.Method_Public_Void_Vector3_0(position);
             // Ajouter une valeur incorrecte dans le packet pour le casser.
             packet.Method_Public_Void_Vector3_0(Vector3.zero);
             ServerSend.Method_Private_Static_Void_ObjectPublicIDisposableLi1ByInByBoUnique_0(packet);
 
-            packet = new Packet(17);
+            _ = new Packet(17);
         }
         void RespawnManagerCGGOTuto()
         {
@@ -2429,9 +2435,9 @@
             public int Team { get; set; }
             public bool Dead { get; set; }
             public bool Katana { get; set; }
-            public bool Classic { get; set; }
-            public bool Shorty { get; set; }
-            public bool Vandal { get; set; }
+            public bool Pistol { get; set; }
+            public bool Shotgun { get; set; }
+            public bool Rifle { get; set; }
             public int Kills { get; set; }
             public int Deaths { get; set; }
             public int Assists { get; set; }
@@ -2467,9 +2473,9 @@
                 Team = team;
                 Dead = false;
                 Katana = false;
-                Classic = false;
-                Shorty = false;
-                Vandal = false;
+                Pistol = false;
+                Shotgun = false;
+                Rifle = false;
                 Revolver = false;
                 Kills = 0;
                 Deaths = 0;
@@ -2514,243 +2520,6 @@
 
     public class CGGOPatchs
     {
-        //OnSnowballUse (Defuser)
-        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.UseItemAll))]
-        [HarmonyPrefix]
-        public static bool OnSnowballUseItemAllPre(ref ulong __0, ref int __1)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return true;
-            if (__1 == 9)
-            {
-                __0 = 2;
-                __1 = -1;
-                return false;
-            }
-            else return true;
-        }
-
-        //Disable snowballPiles
-        [HarmonyPatch(typeof(GameServer), nameof(GameServer.ForceGiveWeapon))]
-        [HarmonyPrefix]
-        public static bool OnForceGiveWeaponPre(ulong param_0, int param_1, int param_2)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return true;
-
-            var player = CGGOManager.CGGOPlayer.GetCGGOPlayer(param_0);
-            if (player == null) return true;
-            else
-            {
-                if (!publicBuyPhase)
-                {
-                    if (param_1 == 9) return false;
-                    else return true;
-                }
-
-                if (player.Team == 1 && param_1 == 5) return false;
-
-            }
-            return true;
-        }
-
-        // Add Weapons to memory
-        [HarmonyPatch(typeof(GameServer), nameof(GameServer.ForceGiveWeapon))]
-        [HarmonyPostfix]
-        public static void OnForceGiveWeaponPost(ulong param_0, int param_1, int param_2)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return;
-
-            var player = CGGOManager.CGGOPlayer.GetCGGOPlayer(param_0);
-            if (player == null) return;
-            else
-            {
-                switch (param_1)
-                {
-                    case 0:
-                        player.Vandal = true;
-                        return;
-                    case 1:
-                        player.Classic = true;
-                        return;
-                    case 2:
-                        player.Revolver = true;
-                        return;
-                    case 3:
-                        player.Shorty = true;
-                        return;
-                    case 6:
-                        player.Katana = true;
-                        return;
-                    default: return;
-                }
-            }
-        }
-
-        // Remove Weapons from memory
-        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.DropItem))]
-        [HarmonyPostfix]
-        public static void OnDropItemPost(ulong param_0, int param_1, int param_2, int param_3)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return;
-
-            var player = CGGOPlayer.GetCGGOPlayer(param_0);
-            if (player == null) return;
-            else
-            {
-                switch (param_1)
-                {
-                    case 0:
-                        player.Vandal = false;
-                        return;
-                    case 1:
-                        player.Classic = false;
-                        return;
-                    case 2:
-                        player.Revolver = false;
-                        return;
-                    case 3:
-                        player.Shorty = false;
-                        return;
-                    case 6:
-                        player.Katana = false;
-                        return;
-                    default: return;
-                }
-            }
-        }
-
-        // Manage advanced interaction
-        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.Interact))]
-        [HarmonyPrefix]
-        public static bool OnInteractPre(ref ulong __0, ref int __1)
-        {
-            // __0 = steamId, __1 = itemId
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return true;
-
-            var player = CGGOPlayer.GetCGGOPlayer(__0);
-            if (player == null) return true;
-
-            // Check if the item is the bomb
-            if (__1 == 500000001 || __1 == 500000000)
-            {
-                if (player.Team == 0)
-                {
-                    if (__1 == 500000000)
-                    {
-                        if (player.Katana)
-                        {
-                            itemToDelete.Add(player.KatanaId, DateTime.Now);
-                            ItemsRemover.deleteDelay = 100;
-                        }
-                        else
-                        {
-                            itemToDelete.Add(player.KnifeId, DateTime.Now);
-                            ItemsRemover.deleteDelay = 100;
-                        }
-                    }
-                    return true; // Let Attackers grab the bomb
-                }
-                else return false; // Do not let defenders grab the bomb
-            }
-            else return true;
-        }
-
-
-        // Bomb to Grenade
-        // WeaponPickUp
-        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.Interact))]
-        [HarmonyPostfix]
-        public static void OnInteractPost(ref ulong param_0, ref int param_1)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return;
-
-            var player = CGGOPlayer.GetCGGOPlayer(param_0);
-            if (player == null) return;
-
-            if (player.Team == 0 && param_1 == 500000000)
-            {
-                // Force remove the item
-                GameServer.ForceRemoveItem(param_0, param_1);
-
-
-                // Assign new weapon IDs and update the player's weapon
-                GameServer.ForceGiveWeapon(param_0, 13, 500000001);
-                publicGrenadeId = 500000001;
-                publicBombId = 500000002;
-
-                // Give the player the appropriate weapon based on whether they have a Katana
-
-                if (player.Katana)
-                {
-                    weaponId++;
-                    GameServer.ForceGiveWeapon(param_0, 6, weaponId);
-                    player.KatanaId = weaponId;
-                    publicKatanaList.Add(weaponId);
-                }
-                else
-                {
-                    weaponId++;
-                    GameServer.ForceGiveWeapon(param_0, 7, weaponId);
-                }
-
-                return;
-            }
-            else
-            {
-                UpdatePlayerWeaponStatus(param_1, player);
-                return;
-            }
-
-            static void UpdatePlayerWeaponStatus(int param_1, CGGOPlayer player)
-            {
-                if (publicClassicList.Contains(param_1))
-                {
-                    player.Classic = true;
-                }
-                if (publicShortyList.Contains(param_1))
-                {
-                    player.Shorty = true;
-                }
-                if (publicVandalList.Contains(param_1))
-                {
-                    player.Vandal = true;
-                }
-                if (publicKatanaList.Contains(param_1))
-                {
-                    player.Katana = true;
-                }
-                if (publicRevolverList.Contains(param_1))
-                {
-                    player.Revolver = true;
-                }
-            }
-
-        }
-
-
-        // Bomb pick up logic
-        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.DropItem))]
-        [HarmonyPrefix]
-        public static bool OnDropItemPre(ulong param_0, int param_1, ref int param_2, int param_3)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive) return true;
-
-            var player = CGGOPlayer.GetCGGOPlayer(param_0);
-            if (player == null) return true;
-            else
-            {
-                if (param_2 == 500000000 || param_2 == 500000001)
-                {
-                    if (player.Team == 0) return true;
-                    else
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-
-
         // Dont let the timer UI update, to display shield instead
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.SendGameModeTimer), [typeof(ulong), typeof(float), typeof(int)])]
         [HarmonyPrefix]
@@ -2766,278 +2535,6 @@
                 else return false;
             }
             else return true;
-        }
-
-        // Custom Weapon Damage system
-        [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.PlayerDamage))]
-        [HarmonyPrefix]
-        internal static void OnPlayerDamagePre(ref ulong __0, ref ulong __1, ref int __2, ref Vector3 __3, ref int __4)
-        {
-            // __0 = damagerId, __1 = damagedId, __2 = damageAmount, __3 = bulletDirection, __4 = weaponId
-
-            // Validate execution conditions
-            if (!SteamManager.Instance.IsLobbyOwner() || !isCGGOActive || __4 == -1) return;
-
-            // Retrieve players
-            CGGOPlayer damager = CGGOPlayer.GetCGGOPlayer(__0);
-            CGGOPlayer damaged = CGGOPlayer.GetCGGOPlayer(__1);
-
-            if (damager == null || damaged == null) return;
-
-            // Update the list of hit players, help to find who is the last person who hitted a player
-            UpdateHitPlayers(__0, __1);
-
-            // Get PlayerManager to obtain position information, etc.   
-            PlayerManager damagerPlayer = GameData.GetPlayer(__0.ToString());
-            PlayerManager damagedPlayer = GameData.GetPlayer(__1.ToString());
-
-            if (damagerPlayer == null || damagedPlayer == null) return;
-
-            Vector3 damagerPos = damagerPlayer.gameObject.transform.position;
-            Vector3 damagedPos = damagedPlayer.gameObject.transform.position;
-
-            Quaternion damagerRot = damagerPlayer.GetRotation();
-            float shootDistance = Vector3.Distance(damagerPos, damagedPos);
-
-
-            // Check for friendly fire
-            if (IsFriendlyFire())
-            {
-                __2 = 0; // No damage 
-                __4 = 9; // Weapon is set as a snowball
-            }
-            else
-            {
-                int damage;
-                string type;
-                float impactHeight;
-
-                switch (__4)
-                {
-                    case 6:
-                        AttributeDamage(80);
-                        ManageAssists(80);
-                        __2 = ManageDamage(80);
-                        __4 = -1;
-                        __0 = __1;
-                        break;
-                    case 7:
-                        AttributeDamage(34);
-                        ManageAssists(34);
-                        __2 = ManageDamage(34);
-                        __4 = -1;
-                        __0 = __1;
-                        break;
-                    case 0:
-                        impactHeight = CalculateImpactHeight(damagerPos, damagerRot, damagedPos);
-                        type = ImpactHeightToType(impactHeight);
-                        damage = CalculateVandalDamage(shootDistance, type);
-                        AttributeDamage(damage);
-                        ManageAssists(damage);
-                        __2 = ManageDamage(damage);
-                        __4 = -1;
-                        __0 = __1;
-                        break;
-                    case 1:
-                        impactHeight = CalculateImpactHeight(damagerPos, damagerRot, damagedPos);
-                        type = ImpactHeightToType(impactHeight);
-                        damage = CalculateClassicDamage(shootDistance, type);
-                        AttributeDamage(damage);
-                        ManageAssists(damage);
-                        __2 = ManageDamage(damage);
-                        __4 = -1;
-                        __0 = __1;
-                        break;
-                    case 2:
-                        impactHeight = CalculateImpactHeight(damagerPos, damagerRot, damagedPos);
-                        type = ImpactHeightToType(impactHeight);
-                        damage = CalculateRevolverDamage(shootDistance, type);
-                        AttributeDamage(damage);
-                        ManageAssists(damage);
-                        __2 = ManageDamage(damage);
-                        __4 = -1;
-                        __0 = __1;
-                        break;
-                    case 3:
-                        impactHeight = CalculateImpactHeight(damagerPos, damagerRot, damagedPos);
-                        type = ImpactHeightToType(impactHeight);
-                        damage = CalculateShortyDamage(shootDistance, type);
-                        AttributeDamage(damage);
-                        ManageAssists(damage);
-                        __2 = ManageDamage(damage);
-                        __4 = -1;
-                        __0 = __1;
-                        break;
-                }
-            }
-
-            void UpdateHitPlayers(ulong damagerId, ulong damagedId)
-            {
-                if (hitPlayers.ContainsKey(damagedId))
-                {
-                    hitPlayers[damagedId] = new KeyValuePair<ulong, DateTime>(damagerId, DateTime.Now);
-                }
-                else
-                {
-                    hitPlayers.Add(damagedId, new KeyValuePair<ulong, DateTime>(damagerId, DateTime.Now));
-                }
-            }
-
-            bool IsFriendlyFire()
-            {
-                return damager.Team == damaged.Team && damager.SteamId != damaged.SteamId;
-            }
-
-            void AttributeDamage(int damage)
-            {
-                damaged.DamageReceived += damage;
-                damager.DamageDealt += damage;
-            }
-            void ManageAssists(int damage)
-            {
-                if (damage == 0) return;
-                if (!damaged.Assisters.Contains(damager))
-                    damaged.Assisters.Add(damager);
-            }
-
-            int CalculateClassicDamage(float distance, string type)
-            {
-                if (distance > 100) return 0;
-
-                switch (type)
-                {
-                    case "legs":
-                        if (distance > 60) return 12;
-                        else return 14;
-                    case "body":
-                        if (distance > 60) return 18;
-                        else return 22;
-                    case "head":
-                        if (distance > 60) return 42;
-                        else return 58;
-                    default: return 0;
-                }
-            }
-
-            int CalculateShortyDamage(float distance, string type)
-            {
-                if (distance > 100) return 0;
-
-                switch (type)
-                {
-                    case "legs":
-                        if (distance > 30) return 14;
-                        else if (distance > 15) return 21;
-                        else return 42;
-                    case "body":
-                        if (distance > 30) return 35;
-                        else if (distance > 15) return 42;
-                        else return 84;
-                    case "head":
-                        if (distance > 30) return 63;
-                        else if (distance > 15) return 77;
-                        else return 154;
-                    default: return 0;
-                }
-            }
-
-            int CalculateRevolverDamage(float distance, string type)
-            {
-                switch (type)
-                {
-                    case "legs":
-                        return (int)(distance * 0.5f);
-                    case "body":
-                        return (int)(distance);
-                    case "head":
-                        return (int)(distance * 2f);
-                    default: return 0;
-                }
-            }
-
-            int CalculateVandalDamage(float distance, string type)
-            {
-                if (distance > 100) return 0;
-
-                return type switch
-                {
-                    "legs" => 12,
-                    "body" => 20,
-                    "head" => 62,
-                    _ => 0,
-                };
-            }
-
-            float CalculateImpactHeight(Vector3 shooterPosition, Quaternion shooterRotation, Vector3 targetPosition)
-            {
-                float targetHeight = 3f;
-                Vector3 targetCenter = targetPosition + new Vector3(0, targetHeight / 2, 0);
-
-                Vector3 shotDirection = shooterRotation * Vector3.forward;
-
-                float distance = Vector3.Distance(shooterPosition, targetCenter);
-                Vector3 impactPosition = shooterPosition + shotDirection * distance;
-
-                float impactHeightRelativeToFeet = impactPosition.y - targetPosition.y;
-
-                return impactHeightRelativeToFeet + 3;
-            }
-
-            string ImpactHeightToType(float impactHeight)
-            {
-                if (impactHeight > 2.750f)
-                {
-                    damager.Headshot += 1;
-                    return "head";
-                }
-                if (impactHeight > 1.48f)
-                {
-                    damager.Bodyshot += 1;
-                    return "body";
-                }
-                else
-                {
-                    damager.Legsshot += 1;
-                    return "legs";
-                }
-            }
-
-            int ManageDamage(int damage)
-            {
-                if (damaged.Shield > 0)
-                {
-                    int shieldDamage = (int)(damage * 0.66);
-                    int healthDamage = damage - shieldDamage;
-
-                    if (damaged.Shield < shieldDamage)
-                    {
-                        healthDamage += (shieldDamage - damaged.Shield);
-                        shieldDamage = damaged.Shield;
-                    }
-
-                    damaged.Shield -= shieldDamage;
-                    if (damaged.Shield < 0) damaged.Shield = 0;
-
-                    damaged.DamageTaken += healthDamage;
-
-                    if (damaged.DamageTaken >= 100) damaged.Killer = damager.SteamId;
-
-                    Utility.Log(logFilePath, $"{damager.Username} damaged {damaged.Username}, shield damage: {shieldDamage}, body damage: {healthDamage}");
-                    return healthDamage;
-                }
-                else
-                {
-                    damaged.DamageTaken += damage;
-                    if (damaged.DamageTaken >= 100)
-                    {
-                        Utility.Log(logFilePath, $"{damager.Username} damaged and killed {damaged.Username}, shield damage: 0, body damage: {damage}");
-                        damaged.Killer = damager.SteamId;
-                    }
-                    else Utility.Log(logFilePath, $"{damager.Username} damaged {damaged.Username}, shield damage: 0, body damage: {damage}");
-
-                    return damage;
-                }
-            }
         }
 
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.PlayerDied))]
@@ -3058,9 +2555,9 @@
                     cggoPlayer.Deaths += 1;
                     cggoPlayer.Dead = true;
                     cggoPlayer.Katana = false;
-                    cggoPlayer.Classic = false;
-                    cggoPlayer.Shorty = false;
-                    cggoPlayer.Vandal = false;
+                    cggoPlayer.Pistol = false;
+                    cggoPlayer.Shotgun = false;
+                    cggoPlayer.Rifle = false;
                     cggoPlayer.Revolver = false;
                     cggoPlayer.Shield = 0;
 
@@ -3163,16 +2660,6 @@
             else Utility.Log(logFilePath, $"{killer.username} killed {killed.username}");
 
 
-        }
-
-        // Disable Snowball Pick up
-        [HarmonyPatch(typeof(GameServer), nameof(GameServer.ForceGiveWeapon))]
-        [HarmonyPrefix]
-        public static bool OnGameServerForceGiveWeaponPre(int param_1)
-        {
-            if (!SteamManager.Instance.IsLobbyOwner()) return true;
-            if (param_1 == 9 && !snowballs && !publicBuyPhase && isCGGOActive) return false;
-            else return true;
         }
     }
 }

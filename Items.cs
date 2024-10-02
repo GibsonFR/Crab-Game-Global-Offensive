@@ -3,7 +3,7 @@
     public class ItemsRemover : MonoBehaviour
     {
         bool init;
-        public static int deleteDelay;
+        public static int deleteDelay = 100;
 
         void Update()
         {
@@ -14,7 +14,7 @@
             }
 
             var dico = SharedObjectManager.Instance.GetDictionary(); // Récupération du dictionnaire partagé
-            List<int> itemsToRemove = new List<int>();
+            List<int> itemsToRemove = [];
 
             // Vérification des items à supprimer
             foreach (var item in itemToDelete)
@@ -46,26 +46,11 @@
                 var comp4 = obj.GetComponent<MonoBehaviour2PublicObauTrSiVeSiGahiUnique>();
                 var comp5 = obj.GetComponent<MonoBehaviour2PublicUnique>();
 
-                if (comp1 != null)
-                {
-                    comp1.TryInteract();
-                }
-                if (comp2 != null)
-                {
-                    comp2.TryInteract();
-                }
-                if (comp3 != null)
-                {
-                    comp3.TryInteract();
-                }
-                if (comp4 != null)
-                {
-                    comp4.TryInteract();
-                }
-                if (comp5 != null)
-                {
-                    comp5.TryInteract();
-                }
+                comp1?.TryInteract();
+                comp2?.TryInteract();
+                comp3?.TryInteract();
+                comp4?.TryInteract();
+                comp5?.TryInteract();
 
                 // Forcer la suppression de l'item sur le serveur
                 GameServer.ForceRemoveItem(clientId, key);

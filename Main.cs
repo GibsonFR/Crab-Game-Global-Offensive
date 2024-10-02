@@ -241,34 +241,34 @@
     {
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.SendChatMessage))]
         [HarmonyPrefix]
-        public static bool ServerSendSendChatMessagePre(ulong param_0, string param_1)
+        public static bool ServerSendSendChatMessagePre(ulong __0, string __1)
         {
             if (!SteamManager.Instance.IsLobbyOwner()) return true;
-            if (param_0 < 101) return true;
+            if (__0 < 101) return true;
 
-            if (param_0 != 1 && !param_1.StartsWith("!") && !param_1.StartsWith("/"))
+            if (__0 != 1 && !__1.StartsWith("!") && !__1.StartsWith("/"))
             {
                 Utility.ReadWordsFilter(wordsFilterFilePath);
 
-                string rank = Utility.GetValue(param_0.ToString(), "rank");
-                string username = Utility.GetValue(param_0.ToString(), "username");
+                string rank = Utility.GetValue(__0.ToString(), "rank");
+                string username = Utility.GetValue(__0.ToString(), "username");
 
-                string[] messageWord = param_1.Split(' ');
+                string[] messageWord = __1.Split(' ');
 
                 foreach (var word in messageWord)
                 {
                     if (wordsFilterList.Contains(word))
                     {
-                        Utility.processNewMessage(messagesList, $"{username} -> *biip*");
+                        Utility.ProcessNewMessage(messagesList, $"{username} -> *biip*");
                         return false;
                     }
                 }
                 if (!muteChat)
                 {
                     if (displayRankInChat)
-                        Utility.processNewMessage(messagesList, $"[{rank}] {username} -> {param_1}");
+                        Utility.ProcessNewMessage(messagesList, $"[{rank}] {username} -> {__1}");
                     else
-                        Utility.processNewMessage(messagesList, $"{username} -> {param_1}");
+                        Utility.ProcessNewMessage(messagesList, $"{username} -> {__1}");
 
                     return false;
                 }
@@ -279,13 +279,13 @@
 
         [HarmonyPatch(typeof(ServerSend), nameof(ServerSend.SendChatMessage))]
         [HarmonyPostfix]
-        public static void ServerSendSendChatMessagePost(ulong param_0, string param_1)
+        public static void ServerSendSendChatMessagePost(ulong __0, string __1)
         {
             if (!SteamManager.Instance.IsLobbyOwner()) return;
-            if (param_0 < 101) return;
-            if (param_1.StartsWith("|")) return;
+            if (__0 < 101) return;
+            if (__1.StartsWith("|")) return;
 
-            if (!param_1.StartsWith("!") && !param_1.StartsWith("/"))
+            if (!__1.StartsWith("!") && !__1.StartsWith("/"))
             {
                 // Send predefined messages
                 for (int i = 0; i < 9; i++)
@@ -473,20 +473,20 @@
         // Floating player patch by lammas123 modified
         [HarmonyPatch(typeof(ServerHandle), nameof(ServerHandle.PlayerPosition))]
         [HarmonyPostfix]
-        internal static void PostServerHandlePlayerPosition(ulong param_0, Packet param_1)
+        internal static void PostServerHandlePlayerPosition(ulong __0, Packet __1)
         {
             if (publicTutoPhase) return;
             if (SteamManager.Instance.IsLobbyOwner())
-                ServerSend.PlayerPosition(param_0, new(BitConverter.ToSingle(param_1.field_Private_ArrayOf_Byte_0, 8), BitConverter.ToSingle(param_1.field_Private_ArrayOf_Byte_0, 12), BitConverter.ToSingle(param_1.field_Private_ArrayOf_Byte_0, 16)));
+                ServerSend.PlayerPosition(__0, new(BitConverter.ToSingle(__1.field_Private_ArrayOf_Byte_0, 8), BitConverter.ToSingle(__1.field_Private_ArrayOf_Byte_0, 12), BitConverter.ToSingle(__1.field_Private_ArrayOf_Byte_0, 16)));
         }
 
         [HarmonyPatch(typeof(ServerHandle), nameof(ServerHandle.PlayerRotation))]
         [HarmonyPostfix]
-        internal static void PostServerHandlePlayerRotation(ulong param_0, Packet param_1)
+        internal static void PostServerHandlePlayerRotation(ulong __0, Packet __1)
         {
             if (publicTutoPhase) return;
             if (SteamManager.Instance.IsLobbyOwner())
-                ServerSend.PlayerRotation(param_0, BitConverter.ToSingle(param_1.field_Private_ArrayOf_Byte_0, 8), BitConverter.ToSingle(param_1.field_Private_ArrayOf_Byte_0, 12));
+                ServerSend.PlayerRotation(__0, BitConverter.ToSingle(__1.field_Private_ArrayOf_Byte_0, 8), BitConverter.ToSingle(__1.field_Private_ArrayOf_Byte_0, 12));
         }
         // Floating player patch by lammas123 modified
     }

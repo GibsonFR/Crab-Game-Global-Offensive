@@ -37,7 +37,7 @@
             displayButton2 = MenuFunctions.HandleMenuDisplay(2, () => "Auto Server Message", () => MenuFunctions.DisplayButtonState(2));
             displayButton3 = MenuFunctions.HandleMenuDisplay(3, () => "Speak PostMortem", () => MenuFunctions.DisplayButtonState(3));
             displayButton4 = MenuFunctions.HandleMenuDisplay(4, () => "Host AFK", () => MenuFunctions.DisplayButtonState(4));
-            displayButton5 = MenuFunctions.HandleMenuDisplay(5, () => "Flung Detector", () => MenuFunctions.DisplayButtonState(5)) + MenuFunctions.GetSelectedFlungDetectorParam();
+            displayButton5 = MenuFunctions.HandleMenuDisplay(5, () => "Flung Detector", () => MenuFunctions.DisplayButtonState(5)) + MenuFunctions.GetSelectedFlungDetector_();
             displayButton6 = MenuFunctions.HandleMenuDisplay(6, () => "Item Detector", () => MenuFunctions.DisplayButtonState(6));
             displayButton7 = MenuFunctions.HandleMenuDisplay(7, () => "Fast Fire Detector", () => MenuFunctions.DisplayButtonState(7));
         }
@@ -219,6 +219,157 @@
         private static bool IsSpecialMenu(int menuSelector)
         {
             return menuSelector == 5;
+        }
+    }
+
+    public class MenuFunctions
+    {
+        public static void CheckMenuFileExists()
+        {
+            string menuContent = "\t\r\n\tPosition : [POSITION]  |  Speed : [SPEED]  |  Rotation : [ROTATION]\t\t<b> \r\n\r\n\t______________________________________________________________________</b>\r\n\r\n\r\n\t<b><color=orange>[OTHERPLAYER]</color></b>  |  Position: [OTHERPOSITION]  |  Speed : [OTHERSPEED] | Selecteur :  [SELECTEDINDEX] | <b>Status : [STATUS]</b> \r\n\r\n\t\t\t\r\n\t\r\n\r\n\t______________________________________________________________________\r\n\r\n\t\t\r\n     <b>[MENUBUTTON0]\r\n\r\n\t[MENUBUTTON1]\r\n\r\n\t[MENUBUTTON2]\r\n\r\n\t[MENUBUTTON3]\r\n\r\n\t[MENUBUTTON4]\r\n\r\n\t_______________________________ANTICHEAT_______________________________\r\n\r\n\t[MENUBUTTON5]\r\n\r\n\t[MENUBUTTON6]\r\n\r\n\t[MENUBUTTON7]</b>";
+
+            if (System.IO.File.Exists(menuFilePath))
+            {
+                string currentContent = System.IO.File.ReadAllText(menuFilePath, System.Text.Encoding.UTF8);
+
+
+                if (currentContent != menuContent)
+                {
+                    System.IO.File.WriteAllText(menuFilePath, menuContent, System.Text.Encoding.UTF8);
+                }
+            }
+            else
+            {
+                // Si le fichier n'existe pas, créez-le avec le contenu fourni
+                System.IO.File.WriteAllText(menuFilePath, menuContent, System.Text.Encoding.UTF8);
+            }
+        }
+        public static void RegisterDataCallbacks(System.Collections.Generic.Dictionary<string, System.Func<string>> dict)
+        {
+            foreach (System.Collections.Generic.KeyValuePair<string, System.Func<string>> pair in dict)
+            {
+                DebugDataCallbacks.Add(pair.Key, pair.Value);
+            }
+        }
+        public static void LoadMenuLayout()
+        {
+            layout = System.IO.File.ReadAllText(menuFilePath, System.Text.Encoding.UTF8);
+        }
+        public static void RegisterDefaultCallbacks()
+        {
+            RegisterDataCallbacks(new System.Collections.Generic.Dictionary<string, System.Func<string>>(){
+                {"POSITION", ClientData.GetClientPositionString},
+                {"SPEED", ClientData.GetClientSpeedString},
+                {"ROTATION", ClientData.GetClientRotationString},
+                {"SELECTEDINDEX", () => playerIndex.ToString()},
+                {"OTHERPLAYER", MultiPlayersData.GetOtherPlayerUsername},
+                {"OTHERPOSITION", MultiPlayersData.GetOtherPlayerPositionAsString},
+                {"OTHERSPEED", MultiPlayersData.GetOtherPlayerSpeed},
+                {"STATUS", MultiPlayersData.GetStatus},
+                {"MENUBUTTON0",() => displayButton0},
+                {"MENUBUTTON1",() => displayButton1},
+                {"MENUBUTTON2",() => displayButton2},
+                {"MENUBUTTON3",() => displayButton3},
+                {"MENUBUTTON4",() => displayButton4},
+                {"MENUBUTTON5",() => displayButton5},
+                {"MENUBUTTON6",() => displayButton6},
+                {"MENUBUTTON7",() => displayButton7},
+            });
+        }
+
+        public static string DisplayButtonState(int index)
+        {
+            if (buttonStates[index])
+                return "<b><color=red>ON</color></b>";
+            else
+                return "<b><color=blue>OFF</color></b>";
+        }
+        public static string FormatLayout()
+        {
+            string formatted = layout;
+            foreach (System.Collections.Generic.KeyValuePair<string, System.Func<string>> pair in DebugDataCallbacks)
+            {
+                formatted = formatted.Replace("[" + pair.Key + "]", pair.Value());
+            }
+            return formatted;
+        }
+        public static string HandleMenuDisplay(int buttonIndex, Func<string> getButtonLabel, Func<string> getButtonSpecificData)
+        {
+            string buttonLabel = getButtonLabel();
+
+            if (menuSelector != buttonIndex)
+            {
+                return $" {buttonLabel} <b>{getButtonSpecificData()}</b>";
+            }
+
+            if (!buttonStates[buttonIndex])
+            {
+                return $"■<color=yellow>{buttonLabel}</color>■  <b>{getButtonSpecificData()}</b>";
+            }
+            else
+            {
+                return $"<color=red>■</color><color=yellow>{buttonLabel}</color><color=red>■</color>  <b>{getButtonSpecificData()}</b>";
+            }
+        }
+        public static string GetSelectedFlungDetector_()
+        {
+            if (menuSelector == 5)
+            {
+                switch (subMenuSelector)
+                {
+                    case 0:
+                        if (onSubButton)
+                            return "  |  " + $"<color=red>■</color><color=orange>Check Frequency : {checkFrequency.ToString("F2")}</color><color=red>■</color>" + $"  |  Alert Level" + $"  |  Flung Detector Status";
+                        else
+                            return "  |  " + $"■<color=orange>Check Frequency : {checkFrequency.ToString("F2")}</color>■" + $"  |  Alert Level" + $"  |  Flung Detector Status";
+                    case 1:
+                        if (onSubButton)
+                            return "  |  " + $"Check Frequency" + $"  |  <color=red>■</color><color=orange>Alert Level : {alertLevel.ToString()}</color><color=red>■</color>" + $"  |  Flung Detector Status";
+                        else
+                            return "  |  " + $"Check Frequency" + $"  |  ■<color=orange>Alert Level : {alertLevel.ToString()}</color>■" + $"  |  Flung Detector Status";
+                    case 2:
+                        return "  |  " + $"Check Frequency" + $"  |  Alert Level" + $"  |  ■<color=orange>Flung Dector Status : {buttonStates[5].ToString()}</color>■";
+                    default:
+                        return "";
+                }
+            }
+            else
+                return "";
+        }
+        public static void ExecuteSubMenuAction()
+        {
+            if (!onButton)
+            {
+                var selectors = (menuSelector, subMenuSelector);
+
+                switch (selectors)
+                {
+                    case (40, -1):
+                        break;
+                }
+            }
+            if (onButton)
+            {
+                var selectors = (menuSelector, subMenuSelector);
+
+                switch (selectors)
+                {
+                    case (5, 0):
+                        onSubButton = !onSubButton;
+                        break;
+                    case (5, 1):
+                        onSubButton = !onSubButton;
+                        break;
+                    case (5, 2):
+                        buttonStates[5] = !buttonStates[5];
+
+                        if (buttonStates[5])
+                            Utility.ForceMessage("■<color=yellow>(FD))Flung Detector ON</color>■");
+                        else
+                            Utility.ForceMessage("■<color=yellow>(FD)Flung Detector OFF</color>■");
+                        break;
+                }
+            }
         }
     }
 }

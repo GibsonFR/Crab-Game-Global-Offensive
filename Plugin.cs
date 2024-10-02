@@ -16,6 +16,7 @@ global using UnityEngine.UI;
 global using Il2CppSystem.Text; 
 global using static GibsonCrabGameGlobalOffensive.Variables;
 global using static GibsonCrabGameGlobalOffensive.CGGOManager;
+global using static GibsonCrabGameGlobalOffensive.WeaponsFunctions;
 
 namespace GibsonCrabGameGlobalOffensive
 {
@@ -37,6 +38,7 @@ namespace GibsonCrabGameGlobalOffensive
             harmony.PatchAll(typeof(CommandPatchs));
             harmony.PatchAll(typeof(AntiCheatPatchs));
             harmony.PatchAll(typeof(CGGOPatchs));
+            harmony.PatchAll(typeof(WeaponsPatchs));
 
             Utility.CreateFolder(mainFolderPath);
             Utility.CreateFolder(playersDataFolderPath);
@@ -58,12 +60,11 @@ namespace GibsonCrabGameGlobalOffensive
 
             for (int i = 0; i < 10; i++)
             {
-                Utility.processNewMessage(messagesList, "GibsonChatSystem Loaded!");
+                Utility.ProcessNewMessage(messagesList, "GibsonChatSystem Loaded!");
             }
 
             Log.LogInfo("Mod created by Gibson, discord: gib_son, github: GibsonFR");
         }
-
 
         [HarmonyPatch(typeof(GameUI), "Awake")]
         [HarmonyPostfix]
