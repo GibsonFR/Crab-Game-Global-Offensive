@@ -35,7 +35,7 @@
             double headshotRatio = (double)player.Headshot / shotTotal;
             double bodyshotRatio = (double)player.Bodyshot / shotTotal;
             double legsshotRatio = (double)player.Legsshot / shotTotal;
-            double moneyEfficiency = player.MoneyReceived > 0 ? (double)player.MoneyUsed / player.MoneyReceived : 1;
+            double moneyEfficiency = player.TotalMoneyReceived > 0 ? (double)player.MoneyUsed / player.TotalMoneyReceived : 1;
             double defuseEfficiency = (double)player.Defuse / 6;
             double damageEfficiency = player.DamageReceived > 0 ? (double)player.DamageDealt / (player.DamageDealt + player.DamageReceived) : 1;
             double killContribution = totalKills > 0 ? (double)player.Kills / totalKills : 0;
@@ -78,7 +78,7 @@
             float headshotRatio = CalculateRatio(player.Headshot, player.Shot);
             float bodyshotRatio = CalculateRatio(player.Bodyshot, player.Shot);
             float legsshotRatio = CalculateRatio(player.Legsshot, player.Shot);
-            float moneyEfficiency = CalculateRatio(player.MoneyUsed, player.MoneyReceived);
+            float moneyEfficiency = CalculateRatio(player.MoneyUsed, player.TotalMoneyReceived);
             float defuseEfficiency = (float)player.Defuse / 6;
 
             // Update player stats using helper method

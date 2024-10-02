@@ -1,9 +1,9 @@
 ﻿namespace GibsonCrabGameGlobalOffensive
 {
-    public enum TeamsId
+    public static class TeamsId
     {
-        Attackers = 0,
-        Defenders = 1,
+        public const int ATTACKERS_ID = 0;
+        public const int DEFENDERS_ID = 1;
     }
     public class CGGOManager : MonoBehaviour
     {
@@ -208,17 +208,8 @@
                 SetBombPosition();
                 SpawnPlantedBomb(siteId);
                 SetCurrentPhaseDefusing();
-                GivePlantingBonus();
+                GivePlantingBounty(publicAttackersList);
 
-            }
-        }
-
-        void GivePlantingBonus()
-        {
-            foreach (var player in publicAttackersList)
-            {
-                player.MoneyReceived += 300;
-                player.Balance += 300;
             }
         }
 
@@ -353,7 +344,7 @@
             ManageMilkZone();
             ManageBuyPhaseStart();
             KillBombSpawner();
-            GiveLastRoundWeapons();
+            GiveLastRoundWeapons(ref lastRoundWeaponGiven);
             DropDefusers();
             ManageBuyPhaseEnd();
         }
@@ -384,7 +375,7 @@
             CalculateTotalTeamScore();
             ResetPlayersRoundStates();
             ResetItemsOnMap();
-            AdjustBalance();
+            CapPlayerBalances(cggoPlayersList);
             if (IsTotalTeamScore5()) SwitchTeamSide();
             RemoveDisconnectedPlayers();
             SpawnTeams();
@@ -620,37 +611,37 @@
         {
             return elapsedDefusingPhase >= 35f;
         }
-        void ManageAllAttackersDeadDuringPlanting()
-        {
-            SetRoundEnded();
-            SetDefendersWon();
-            GiveEndRoundMoney(1);
-            ManageLoseStrike(0);
-        }
         void ManageAllDefendersDead()
         {
             SetRoundEnded();
             SetAttackersWon();
-            GiveEndRoundMoney(0);
-            ManageLoseStrike(1);
+            DistributeEndRoundMoney(cggoPlayersList, TeamsId.ATTACKERS_ID, loseStrike.Value);
+            ManageLoseStrike(TeamsId.DEFENDERS_ID);
         }
         void ManageBombNotDefusedInTime()
         {
             SetRoundEnded();
             SetAttackersWon();
-            GiveEndRoundMoney(0);
-            ManageLoseStrike(1);
+            DistributeEndRoundMoney(cggoPlayersList, TeamsId.ATTACKERS_ID, loseStrike.Value);
+            ManageLoseStrike(TeamsId.DEFENDERS_ID);
             ManageBombExplosion();
             RemovePlantedBomb();
 
+        }
+        void ManageAllAttackersDeadDuringPlanting()
+        {
+            SetRoundEnded();
+            SetDefendersWon();
+            DistributeEndRoundMoney(cggoPlayersList, TeamsId.DEFENDERS_ID, loseStrike.Value);
+            ManageLoseStrike(TeamsId.ATTACKERS_ID);
         }
 
         void ManagePlantingPhaseOver()
         {
             SetRoundEnded();
             SetDefendersWon();
-            GiveEndRoundMoney(1);
-            ManageLoseStrike(0);
+            DistributeEndRoundMoney(cggoPlayersList, TeamsId.DEFENDERS_ID, loseStrike.Value);
+            ManageLoseStrike(TeamsId.ATTACKERS_ID);
         }
 
         void ManageBombDefused()
@@ -659,8 +650,8 @@
             RemovePlantedBomb();
             SetRoundEnded();
             SetDefendersWon();
-            ManageLoseStrike(0);
-            GiveEndRoundMoney(1);
+            DistributeEndRoundMoney(cggoPlayersList, TeamsId.DEFENDERS_ID, loseStrike.Value);
+            ManageLoseStrike(TeamsId.ATTACKERS_ID);
         }
 
         void GiveDefusePoint()
@@ -701,28 +692,6 @@
                     catch { }
                 }
                 catch { }
-            }
-        }
-
-        void GiveEndRoundMoney(int winnerTeam)
-        {
-            foreach (var player in cggoPlayersList)
-            {
-                if (player.Team == winnerTeam)
-                {
-                    player.Balance += 2500;
-                    player.MoneyReceived += 2500;
-                }
-                else if (player.Dead)
-                {
-                    player.Balance += 1800 + (300 * loseStrike.Value);
-                    player.MoneyReceived += 1800 + (300 * loseStrike.Value);
-                }
-                else
-                {
-                    player.Balance += 1000;
-                    player.MoneyReceived += 1000;
-                }
             }
         }
 
@@ -935,18 +904,6 @@
             foreach (var player in playersToBan)
             {
                 Utility.Log(logFilePath, $"Cheater Kicked: {player.Username}, {player.SteamId}");
-                GameServer.ForceRemoveItemItemId(player.SteamId, 7);
-                if (player.Rifle) GameServer.ForceRemoveItemItemId(player.SteamId, 0);
-                if (player.Pistol) GameServer.ForceRemoveItemItemId(player.SteamId, 1);
-                if (player.Revolver) GameServer.ForceRemoveItemItemId(player.SteamId, 2);
-                if (player.Shotgun) GameServer.ForceRemoveItemItemId(player.SteamId, 3);
-                if (player.Katana) GameServer.ForceRemoveItemItemId(player.SteamId, 6);
-                player.Rifle = false;
-                player.Pistol = false;
-                player.Revolver = false;
-                player.Shotgun = false;
-                player.Katana = false;
-                player.Balance = 0;
 
                 SetGameStateFreeze();
                 cheaterSteamId = player.SteamId;
@@ -1015,7 +972,7 @@
             if (buyPhaseStart) return;
             buyPhaseStart = true;
             SpawnBomb();
-            if (IsRound1or6()) GiveStartMoney();
+            if (IsRound1or6()) GiveStartingMoney(cggoPlayersList);
         }
 
         void KillBombSpawner()
@@ -1024,53 +981,6 @@
 
             killBombSpawner = true;
             KillPlayer(bombSpawnerId);
-        }
-
-        void GiveLastRoundWeapons()
-        {
-            if (lastRoundWeaponGiven) return;
-            lastRoundWeaponGiven = true;
-
-            foreach (var player in cggoPlayersList)
-            {
-                if (player.Pistol)
-                {
-                    weaponId++;
-                    GameServer.ForceGiveWeapon(player.SteamId, 1, weaponId);
-                    if (!publicPistolList.Contains(weaponId)) publicPistolList.Add(weaponId);
-                }
-                if (player.Shotgun)
-                {
-                    weaponId++;
-                    GameServer.ForceGiveWeapon(player.SteamId, 3, weaponId);
-                    if (!publicShotgunList.Contains(weaponId)) publicShotgunList.Add(weaponId);
-                }
-                if (player.Rifle)
-                {
-                    weaponId++;
-                    GameServer.ForceGiveWeapon(player.SteamId, 0, weaponId);
-                    if (!publicRifleList.Contains(weaponId)) publicRifleList.Add(weaponId);
-                }
-                if (player.Revolver)
-                {
-                    weaponId++;
-                    GameServer.ForceGiveWeapon(player.SteamId, 2, weaponId);
-                    if (!publicRevolverList.Contains(weaponId)) publicRevolverList.Add(weaponId);
-                }
-                if (player.Katana)
-                {
-                    int weaponId = Variables.weaponId++;
-                    GameServer.ForceGiveWeapon(player.SteamId, 6, weaponId);
-                    player.KatanaId = weaponId;
-                    if (!publicKatanaList.Contains(weaponId)) publicKatanaList.Add(weaponId);
-                }
-                else
-                {
-                    int weaponId = Variables.weaponId++;
-                    GameServer.ForceGiveWeapon(player.SteamId, 7, weaponId);
-                    player.KnifeId = weaponId;
-                }
-            }
         }
 
         void AssignWeapon(ulong steamId, int weaponTypeId, List<int> weaponList)
@@ -1172,13 +1082,9 @@
                 if (player.Team == 0) player.Team = 1;
                 else if (player.Team == 1) player.Team = 0;
 
-                player.Balance = 0;
-                player.Katana = false;
-                player.Pistol = false;
-                player.Shotgun = false;
-                player.Rifle = false;
-                player.Revolver = false;
-                player.Shield = 0;
+                ResetPlayerBalance(player);
+                ResetPlayerWeapons(player);
+                ResetPlayerShield(player);
             }
         }
 
@@ -1610,14 +1516,6 @@
             }
             catch { }
         }
-        void GiveStartMoney()
-        {
-            foreach (var player in cggoPlayersList)
-            {
-                player.Balance += 800;
-                player.MoneyReceived += 800;
-            }
-        }
 
         void SendPlantingPhaseMessages()
         {
@@ -1676,11 +1574,6 @@
             int length = message.Length;
             shift %= length;
             return message.Substring(shift) + message.Substring(0, shift);
-        }
-
-        void AdjustBalance()
-        {
-            foreach (var player in cggoPlayersList) if (player.Balance > 6000) player.Balance = 6000;
         }
 
         void SendDefusePhaseMessages()
@@ -2073,42 +1966,32 @@
 
                 if (playersDelta > 0)
                 {
-                    ApplyBonus(publicDefendersList, playersDelta);
+                    ApplyAfkBonus(publicDefendersList, playersDelta);
                 }
                 else if (playersDelta < 0)
                 {
-                    ApplyBonus(publicAttackersList, -playersDelta);
+                    ApplyAfkBonus(publicAttackersList, -playersDelta);
                 }
 
                 bonusGiven = true;
             }
         }
 
-        void ApplyBonus(List<CGGOPlayer> players, int delta)
+        void ApplyAfkBonus(List<CGGOPlayer> players, int afkCount)
         {
             foreach (var player in players)
             {
                 if (IsRound1or6())
                 {
-                    player.Shield = CalculateShield(players.Count, delta);
+                    player.Shield = CalculateShieldBonus(players.Count, afkCount);
                 }
                 else
                 {
-                    player.Balance += CalculateBalance(players.Count, delta);
+                    player.Balance += CalculateAFKBonus(players.Count, afkCount);
                 }
 
-                AdjustBalance();
+                CapPlayerBalances(players);
             }
-        }
-
-        int CalculateBalance(int playersCount, int delta)
-        {
-            return (int)((2000 * (float)delta) / (float)playersCount);
-        }
-
-        int CalculateShield(int playersCount, int delta)
-        {
-            return (int)((125 * (float)delta) / (float)playersCount);
         }
 
         bool AreAllAttackersDisconnected()
@@ -2133,7 +2016,7 @@
 
             if (AreAllAttackersDisconnected())
             {
-                SetMaxScore(1);
+                SetMaxScore(TeamsId.DEFENDERS_ID);
                 SetGameStateFreeze();
                 GetAndSetTeamList();
                 EndGameRankPlayers();
@@ -2141,7 +2024,7 @@
             }
             if (AreAllDefendersDisconnected())
             {
-                SetMaxScore(0);
+                SetMaxScore(TeamsId.ATTACKERS_ID);
                 SetGameStateFreeze();
                 GetAndSetTeamList();
                 EndGameRankPlayers();
@@ -2458,7 +2341,7 @@
             public int DamageDealt { get; set; }
             public int DamageReceived { get; set; }
             public int MoneyUsed { get; set; }
-            public int MoneyReceived { get; set; }
+            public int TotalMoneyReceived { get; set; }
             public int EndGameRank { get; set; }
             public float Elo { get; set; }
             public double Score { get; set; }
@@ -2496,7 +2379,7 @@
                 DamageDealt = 0;
                 DamageReceived = 0;
                 MoneyUsed = 0;
-                MoneyReceived = 0;
+                TotalMoneyReceived = 0;
                 EndGameRank = 0;
                 Score = 0;
                 CurrentPhaseMessageState = 0;
@@ -2571,15 +2454,13 @@
                                 if (player.SteamId != cggoPlayer.Killer)
                                 {
                                     player.Assists += 1;
-                                    player.Balance += 50;
-                                    player.MoneyReceived += 50;
+                                    GiveAssistBounty(player);
                                 }
                             }
 
                             if (cggoKiller != null)
                             {
-                                cggoKiller.Balance += 200;
-                                cggoKiller.MoneyReceived += 200;
+                                GiveKillBounty(cggoKiller);
                                 cggoKiller.Kills += 1;
                             }
                             cggoPlayer.Killer = 0;
@@ -2602,16 +2483,14 @@
                                     if (player.SteamId != cggoPlayer.Killer)
                                     {
                                         player.Assists += 1;
-                                        player.Balance += 50;
-                                        player.MoneyReceived += 50;
+                                        GiveAssistBounty(player);
                                     }
                                 }
 
                                 if (cggoKiller != null)
                                 {
-                                    cggoKiller.Balance += 200;
-                                    cggoKiller.MoneyReceived += 200;
                                     cggoKiller.Kills += 1;
+                                    GiveKillBounty(cggoKiller);
                                 }
                                 cggoPlayer.Killer = 0;
                             }

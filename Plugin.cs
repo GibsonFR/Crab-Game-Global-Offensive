@@ -16,7 +16,8 @@ global using UnityEngine.UI;
 global using Il2CppSystem.Text; 
 global using static GibsonCrabGameGlobalOffensive.Variables;
 global using static GibsonCrabGameGlobalOffensive.CGGOManager;
-global using static GibsonCrabGameGlobalOffensive.WeaponsFunctions;
+global using static GibsonCrabGameGlobalOffensive.WeaponsSystem;
+global using static GibsonCrabGameGlobalOffensive.EconomySystem;
 
 namespace GibsonCrabGameGlobalOffensive
 {

@@ -78,6 +78,7 @@ namespace GibsonCrabGameGlobalOffensive
         public const float SHIELD_DAMAGE_RATIO = 0.66f; // 66% of damage goes to the shield
         public const int SMALL_SHIELD_VALUE = 25;
         public const int BIG_SHIELD_VALUE = 50;
+        public const int AFK_BONUS_SHIELD = 125;
 
         // Shields Prices
         public const int SMALL_SHIELD_PRICE = 400;
@@ -185,7 +186,7 @@ namespace GibsonCrabGameGlobalOffensive
             Utility.ForceMessage($"{sharedObjectId}, {sharedObjectName}, {player.Team}");
 
             // Allow only attackers to interact with the bomb
-            if (player.Team == (int)TeamsId.Attackers)
+            if (player.Team == (int)TeamsId.ATTACKERS_ID)
             {
                 if (sharedObjectName == "Bomb(Clone)")
                 {
@@ -220,7 +221,7 @@ namespace GibsonCrabGameGlobalOffensive
             if (player == null) return; // If the player isn't participating in CGGO, exit early
 
             // If a attackers picks up the bomb, convert it to a grenade
-            if (player.Team == (int)TeamsId.Attackers && originalBombId == sharedObjectId)
+            if (player.Team == (int)TeamsId.ATTACKERS_ID && originalBombId == sharedObjectId)
             {
                 // Force the removal of the bomb from the player's inventory
                 GameServer.ForceRemoveItem(steamId, sharedObjectId);
@@ -273,7 +274,7 @@ namespace GibsonCrabGameGlobalOffensive
             if (player == null) return true; // Exit early if the player is not in CGGO
 
             // Allow attackers to drop the bomb, but block defenders
-            if (player.Team == (int)TeamsId.Attackers) return true; // Allow bomb drop for attackers
+            if (player.Team == (int)TeamsId.ATTACKERS_ID) return true; // Allow bomb drop for attackers
             else return false; // Block bomb drop for defenders
         }
 
@@ -576,8 +577,72 @@ namespace GibsonCrabGameGlobalOffensive
         }
     }
 
-    public class WeaponsFunctions
+    public class WeaponsSystem
     {
+        public static void ResetPlayerShield(CGGOPlayer player)
+        {
+            player.Shield = 0;
+        }
+
+        public static int CalculateShieldBonus(int playersCount, int delta)
+        {
+            return (int)((ShieldConstants.AFK_BONUS_SHIELD * (float)delta) / (float)playersCount);
+        }
+
+        public static void ResetPlayerWeapons(CGGOPlayer player)
+        {
+            player.Katana = false;
+            player.Pistol = false;
+            player.Shotgun = false;
+            player.Rifle = false;
+            player.Revolver = false;
+        }
+        public static void GiveLastRoundWeapons(ref bool lastRoundWeaponGiven)
+        {
+            if (lastRoundWeaponGiven) return;
+            lastRoundWeaponGiven = true;
+
+            foreach (var player in cggoPlayersList)
+            {
+                if (player.Pistol)
+                {
+                    weaponId++;
+                    GameServer.ForceGiveWeapon(player.SteamId, WeaponsId.PISTOL_ID, weaponId);
+                    if (!publicPistolList.Contains(weaponId)) publicPistolList.Add(weaponId);
+                }
+                if (player.Shotgun)
+                {
+                    weaponId++;
+                    GameServer.ForceGiveWeapon(player.SteamId, WeaponsId.SHOTGUN_ID, weaponId);
+                    if (!publicShotgunList.Contains(weaponId)) publicShotgunList.Add(weaponId);
+                }
+                if (player.Rifle)
+                {
+                    weaponId++;
+                    GameServer.ForceGiveWeapon(player.SteamId, WeaponsId.RIFLE_ID, weaponId);
+                    if (!publicRifleList.Contains(weaponId)) publicRifleList.Add(weaponId);
+                }
+                if (player.Revolver)
+                {
+                    weaponId++;
+                    GameServer.ForceGiveWeapon(player.SteamId, WeaponsId.REVOLVER_ID, weaponId);
+                    if (!publicRevolverList.Contains(weaponId)) publicRevolverList.Add(weaponId);
+                }
+                if (player.Katana)
+                {
+                    int weaponId = Variables.weaponId++;
+                    GameServer.ForceGiveWeapon(player.SteamId, WeaponsId.KATANA_ID, weaponId);
+                    player.KatanaId = weaponId;
+                    if (!publicKatanaList.Contains(weaponId)) publicKatanaList.Add(weaponId);
+                }
+                else
+                {
+                    int weaponId = Variables.weaponId++;
+                    GameServer.ForceGiveWeapon(player.SteamId, WeaponsId.KNIFE_ID, weaponId);
+                    player.KnifeId = weaponId;
+                }
+            }
+        }
         // Find the name of a SharedObject
         public static string FindSharedObjectName(int sharedObjectId)
         {
